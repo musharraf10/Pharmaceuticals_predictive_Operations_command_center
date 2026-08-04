@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { env } from "../config/env";
 
 const TOKEN_COOKIE_NAME = "token";
 
@@ -11,7 +12,7 @@ export const generateToken = (userId) => {
 export const sendTokenCookie = (res, token) => {
   res.cookie(TOKEN_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
