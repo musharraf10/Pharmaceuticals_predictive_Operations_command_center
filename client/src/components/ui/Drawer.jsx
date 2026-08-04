@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import Button from "./Button";
 import { cn } from "../../utils/cn";
 
-const Modal = ({ open, title, children, onClose, footer, size = "md" }) => {
+const Drawer = ({ open, title, children, onClose, footer, width = "max-w-md" }) => {
   useEffect(() => {
     if (!open) return;
 
@@ -23,20 +23,8 @@ const Modal = ({ open, title, children, onClose, footer, size = "md" }) => {
 
   if (!open) return null;
 
-  const sizes = {
-    sm: "max-w-md",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
-  };
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
       <div
         className="absolute inset-0 bg-secondary-900/40 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
@@ -44,21 +32,19 @@ const Modal = ({ open, title, children, onClose, footer, size = "md" }) => {
 
       <div
         className={cn(
-          "relative w-full animate-slide-up rounded-2xl bg-white shadow-modal",
-          sizes[size],
+          "absolute right-0 top-0 flex h-full w-full flex-col bg-white shadow-modal animate-slide-up",
+          width,
         )}
       >
         <div className="flex items-center justify-between border-b border-secondary-200 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-secondary-900">
-            {title}
-          </h2>
+          <h2 className="text-lg font-semibold text-secondary-900">{title}</h2>
 
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X size={20} />
           </Button>
         </div>
 
-        <div className="px-6 py-5">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
 
         {footer && (
           <div className="flex justify-end gap-3 border-t border-secondary-200 px-6 py-4">
@@ -70,4 +56,4 @@ const Modal = ({ open, title, children, onClose, footer, size = "md" }) => {
   );
 };
 
-export default Modal;
+export default Drawer;

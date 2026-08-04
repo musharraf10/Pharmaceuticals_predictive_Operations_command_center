@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
+  darkMode: "class",
 
   theme: {
     extend: {
@@ -63,7 +64,15 @@ export default {
       },
 
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+      },
+
+      fontSize: {
+        page: ["2.25rem", { lineHeight: "2.5rem", fontWeight: "700" }],
+        section: ["1.5rem", { lineHeight: "2rem", fontWeight: "600" }],
+        card: ["1.125rem", { lineHeight: "1.75rem", fontWeight: "600" }],
+        body: ["0.9375rem", { lineHeight: "1.5rem" }],
+        small: ["0.8125rem", { lineHeight: "1.25rem" }],
       },
 
       borderRadius: {
@@ -72,18 +81,37 @@ export default {
       },
 
       boxShadow: {
-        card: "0 2px 10px rgba(15,23,42,.08)",
-        dropdown: "0 8px 30px rgba(15,23,42,.12)",
-        modal: "0 15px 40px rgba(15,23,42,.15)",
+        card: "0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 16px rgba(15, 23, 42, 0.06)",
+        "card-hover":
+          "0 4px 6px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.1)",
+        dropdown: "0 8px 30px rgba(15, 23, 42, 0.12)",
+        modal: "0 15px 40px rgba(15, 23, 42, 0.15)",
       },
 
       spacing: {
         navbar: "72px",
         sidebar: "280px",
+        "sidebar-collapsed": "80px",
       },
 
       transitionDuration: {
         250: "250ms",
+      },
+
+      animation: {
+        "fade-in": "fadeIn 0.2s ease-out",
+        "slide-up": "slideUp 0.25s ease-out",
+      },
+
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideUp: {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
     },
   },
