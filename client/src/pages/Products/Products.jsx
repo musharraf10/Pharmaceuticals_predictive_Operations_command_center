@@ -25,7 +25,7 @@ const columns = [
   { header: "Actions", key: "actions", className: "text-right" },
 ];
 
-const categoryOptions = ["Tablet", "Capsule", "Injection", "Syrup", "Cream", "Other"];
+const categoryOptions = ["Tablet", "Capsule", "Injection", "Syrup", "Cream", "Powder", "Gel", "Drops", "Ointment", "Suspension", "Other"];
 
 const productDefaults = {
   name: "",
