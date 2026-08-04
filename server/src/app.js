@@ -22,7 +22,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://pharmaceuticals-predictive-operations.onrender.com",
+    origin: "https://pharmacenter.netlify.app",
     credentials: true,
   }),
 );
