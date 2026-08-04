@@ -3,18 +3,18 @@ import { Navigate, Outlet } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 import useAuth from "../hooks/useAuth";
 
-const ProtectedRoute = () => {
+const PublicRoute = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return <Loader fullScreen />;
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

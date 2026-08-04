@@ -18,6 +18,7 @@ export const API_ENDPOINTS = Object.freeze({
   DASHBOARD: "/dashboard",
 
   FORECAST: "/forecast",
+  FORECAST_RUN: "/forecast/run",
 
   TASKS: "/tasks",
 
@@ -25,9 +26,18 @@ export const API_ENDPOINTS = Object.freeze({
 
   APPROVALS: "/approvals",
 
-  REPORTS: "/reports",
+  REPORTS: Object.freeze({
+    SUMMARY: "/reports/summary",
+    INVENTORY: "/reports/inventory",
+    ORDERS: "/reports/orders",
+    PRODUCTION: "/reports/production",
+    FORECAST: "/reports/forecast",
+    COMPLAINTS: "/reports/complaints",
+    TASKS: "/reports/tasks",
+  }),
 
   NOTIFICATIONS: "/notifications",
+  NOTIFICATIONS_MARK_ALL_READ: "/notifications/mark-all-read",
 
   AUDIT_LOGS: "/audit-logs",
 });
