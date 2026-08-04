@@ -4,13 +4,42 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createSupplier = asyncHandler(async (req, res) => {
-  const exists = await Supplier.findOne({ name: req.body.name });
+  const { name, contactPerson, email, phone, address, rating, deliveryDays, status } = req.body;
 
-  if (exists) {
-    throw new ApiError(400, "Supplier already exists.");
+  if (
+    !name ||
+    !contactPerson ||
+    !email ||
+    !phone ||
+    !address ||
+    deliveryDays === undefined ||
+    deliveryDays === null ||
+    deliveryDays === ""
+  ) {
+    throw new ApiError(
+      400,
+      "Name, contact person, email, phone, address, and delivery days are required.",
+    );
   }
 
-  const supplier = await Supplier.create(req.body);
+  const exists = await Supplier.findOne({
+    $or: [{ name: String(name).trim() }, { email: String(email).trim().toLowerCase() }],
+  });
+
+  if (exists) {
+    throw new ApiError(400, "Supplier with this name or email already exists.");
+  }
+
+  const supplier = await Supplier.create({
+    name,
+    contactPerson,
+    email,
+    phone,
+    address,
+    rating: rating !== undefined ? Number(rating) : 5,
+    deliveryDays: Number(deliveryDays),
+    status: status || "ACTIVE",
+  });
 
   return res
     .status(201)
@@ -18,7 +47,25 @@ export const createSupplier = asyncHandler(async (req, res) => {
 });
 
 export const getSuppliers = asyncHandler(async (req, res) => {
-  const suppliers = await Supplier.find().sort({ createdAt: -1 });
+  const { search, status } = req.query;
+  const filter = {};
+
+  if (status) {
+    filter.status = status;
+  }
+
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    filter.$or = [
+      { name: searchRegex },
+      { contactPerson: searchRegex },
+      { email: searchRegex },
+      { phone: searchRegex },
+      { address: searchRegex },
+    ];
+  }
+
+  const suppliers = await Supplier.find(filter).sort({ createdAt: -1 });
 
   return res
     .status(200)
