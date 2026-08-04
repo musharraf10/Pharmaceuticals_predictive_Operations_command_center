@@ -40,20 +40,21 @@ import Loader from "../../components/ui/Loader";
 import NotificationCard from "../../components/ui/NotificationCard";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { useDashboard } from "../../hooks/useDashboard";
+import { useLayout } from "../../hooks/useLayout";
 import { exportCsv } from "../../utils/exportCsv";
 import { formatRelativeTime } from "../../utils/formatDate";
 import { ORDER_STATUS } from "../../utils/statusConfig";
 
-const CHART_COLORS = ["#2563EB", "#16A34A", "#F59E0B", "#DC2626", "#0891B2"];
+const CHART_COLORS = ["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#06B6D4"];
 
 const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-xl border border-secondary-200 bg-white px-4 py-3 shadow-dropdown">
-      <p className="mb-1 text-[13px] font-medium text-secondary-500">{label}</p>
+    <div className="rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-dropdown text-secondary-900 dark:text-white">
+      <p className="mb-1 text-[13px] font-medium text-secondary-500 dark:text-slate-400">{label}</p>
       {payload.map((entry) => (
-        <p key={entry.name} className="text-sm font-semibold text-secondary-900">
+        <p key={entry.name} className="text-sm font-semibold text-secondary-900 dark:text-white">
           {entry.name}: {entry.value}
         </p>
       ))}
@@ -63,6 +64,11 @@ const ChartTooltip = ({ active, payload, label }) => {
 
 const Dashboard = () => {
   const { dashboard, isLoading, isError } = useDashboard();
+  const { theme } = useLayout();
+
+  const isDark = theme === "dark";
+  const gridColor = isDark ? "#334155" : "#E2E8F0";
+  const tickColor = isDark ? "#CBD5E1" : "#64748B";
 
   if (isLoading) return <Loader fullScreen />;
 
@@ -269,9 +275,9 @@ const Dashboard = () => {
         >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={orderPipelineData} barSize={32}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip />} />
               <Bar dataKey="value" name="Orders" radius={[6, 6, 0, 0]}>
                 {orderPipelineData.map((_, i) => (
@@ -310,12 +316,12 @@ const Dashboard = () => {
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={forecastTrend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip />} />
-              <Area type="monotone" dataKey="demand" name="Actual" stroke="#2563EB" fill="#2563EB" fillOpacity={0.1} strokeWidth={2} />
-              <Area type="monotone" dataKey="forecast" name="Forecast" stroke="#16A34A" fill="#16A34A" fillOpacity={0.1} strokeWidth={2} strokeDasharray="5 5" />
+              <Area type="monotone" dataKey="demand" name="Actual" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.15} strokeWidth={2} />
+              <Area type="monotone" dataKey="forecast" name="Forecast" stroke="#22C55E" fill="#22C55E" fillOpacity={0.15} strokeWidth={2} strokeDasharray="5 5" />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -326,11 +332,11 @@ const Dashboard = () => {
         <ChartCard title="Production Overview" subtitle="Batch status by stage" className="lg:col-span-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={productionData} layout="vertical" barSize={20}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} width={90} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} width={90} />
               <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="batches" name="Batches" fill="#2563EB" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="batches" name="Batches" fill="#3B82F6" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -344,12 +350,12 @@ const Dashboard = () => {
                 <Link
                   key={action.label}
                   to={action.path}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-secondary-200 p-4 text-center transition-all duration-200 hover:scale-[1.02] hover:border-primary-200 hover:bg-primary-50 hover:shadow-card"
+                  className="flex flex-col items-center gap-2 rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 text-center transition-all duration-200 hover:scale-[1.02] hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-slate-800/80 hover:shadow-card"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400">
                     <Icon size={20} />
                   </div>
-                  <span className="text-[13px] font-medium text-secondary-700">
+                  <span className="text-[13px] font-medium text-secondary-700 dark:text-slate-200">
                     {action.label}
                   </span>
                 </Link>
@@ -366,8 +372,8 @@ const Dashboard = () => {
             title="AI Recommendations"
             subtitle="Predictive insights from PharmaOps engine"
             action={
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50">
-                <Sparkles size={16} className="text-primary-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-900/40">
+                <Sparkles size={16} className="text-primary-600 dark:text-primary-400" />
               </div>
             }
           />
@@ -377,14 +383,14 @@ const Dashboard = () => {
               <Link
                 key={rec.title}
                 to={rec.link}
-                className="group flex items-start gap-4 rounded-xl border border-secondary-200 p-4 transition-all duration-200 hover:scale-[1.01] hover:border-primary-200 hover:shadow-card-hover"
+                className="group flex items-start gap-4 rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 transition-all duration-200 hover:scale-[1.01] hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:shadow-card-hover"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50">
-                  <BrainCircuit size={18} className="text-primary-600" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/40">
+                  <BrainCircuit size={18} className="text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-secondary-900">{rec.title}</p>
+                    <p className="font-semibold text-secondary-900 dark:text-white">{rec.title}</p>
                     <Badge
                       color={
                         rec.priority === "high"
@@ -398,11 +404,11 @@ const Dashboard = () => {
                       {rec.priority}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-[13px] text-secondary-500">{rec.description}</p>
+                  <p className="mt-1 text-[13px] text-secondary-500 dark:text-slate-300">{rec.description}</p>
                 </div>
                 <ArrowRight
                   size={16}
-                  className="mt-1 shrink-0 text-secondary-400 transition group-hover:translate-x-0.5 group-hover:text-primary-600"
+                  className="mt-1 shrink-0 text-secondary-400 dark:text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-primary-600 dark:group-hover:text-primary-400"
                 />
               </Link>
             ))}
@@ -424,7 +430,7 @@ const Dashboard = () => {
                 />
               ))
             ) : (
-              <p className="py-8 text-center text-[15px] text-secondary-500">
+              <p className="py-8 text-center text-[15px] text-secondary-500 dark:text-slate-400">
                 All caught up — no new notifications
               </p>
             )}
@@ -435,7 +441,7 @@ const Dashboard = () => {
       {/* Live Queue + Recent Activity */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card padding={false}>
-          <div className="border-b border-secondary-200 p-6">
+          <div className="border-b border-secondary-200 dark:border-slate-800 p-6">
             <CardHeader
               title="Live Order Queue"
               subtitle="Orders awaiting fulfillment"
@@ -443,18 +449,18 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="h-[340px] overflow-y-auto custom-scrollbar divide-y divide-secondary-100">
+          <div className="h-[340px] overflow-y-auto custom-scrollbar divide-y divide-secondary-100 dark:divide-slate-800/80">
             {liveQueue?.length > 0 ? (
               liveQueue.map((order) => (
                 <div
                   key={order._id}
-                  className="flex items-center justify-between px-6 py-4 transition hover:bg-secondary-50"
+                  className="flex items-center justify-between px-6 py-4 transition hover:bg-secondary-50 dark:hover:bg-slate-800/60"
                 >
                   <div>
-                    <p className="font-medium text-secondary-900">
+                    <p className="font-semibold text-secondary-900 dark:text-white">
                       {order.product?.name ?? "Product"}
                     </p>
-                    <p className="text-[13px] text-secondary-500">
+                    <p className="text-[13px] text-secondary-500 dark:text-slate-300">
                       {order.customerName} · Qty {order.quantity}
                     </p>
                   </div>
@@ -462,7 +468,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="px-6 py-10 text-center text-[15px] text-secondary-500">
+              <p className="px-6 py-10 text-center text-[15px] text-secondary-500 dark:text-slate-400">
                 No orders in queue
               </p>
             )}
@@ -470,7 +476,7 @@ const Dashboard = () => {
         </Card>
 
         <Card padding={false}>
-          <div className="border-b border-secondary-200 p-6">
+          <div className="border-b border-secondary-200 dark:border-slate-800 p-6">
             <CardHeader
               title="Recent Activity"
               subtitle="Audit trail across operations"
@@ -478,26 +484,26 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="h-[340px] overflow-y-auto custom-scrollbar divide-y divide-secondary-100">
+          <div className="h-[340px] overflow-y-auto custom-scrollbar divide-y divide-secondary-100 dark:divide-slate-800/80">
             {recentActivities?.length > 0 ? (
               recentActivities.map((activity) => (
                 <div key={activity._id} className="flex gap-4 px-6 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-100">
-                    <CheckCircle2 size={16} className="text-secondary-500" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-100 dark:bg-slate-800">
+                    <CheckCircle2 size={16} className="text-secondary-500 dark:text-slate-300" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[15px] text-secondary-900">
-                      <span className="font-medium">{activity.user?.name ?? "System"}</span>
+                    <p className="text-[15px] text-secondary-900 dark:text-slate-100">
+                      <span className="font-semibold text-secondary-900 dark:text-white">{activity.user?.name ?? "System"}</span>
                       {" "}{activity.action}
                     </p>
-                    <p className="text-[13px] text-secondary-500">
+                    <p className="text-[13px] text-secondary-500 dark:text-slate-300">
                       {activity.entity} · {formatRelativeTime(activity.createdAt)}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="px-6 py-10 text-center text-[15px] text-secondary-500">
+              <p className="px-6 py-10 text-center text-[15px] text-secondary-500 dark:text-slate-400">
                 No recent activity
               </p>
             )}

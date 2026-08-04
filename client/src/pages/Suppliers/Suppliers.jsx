@@ -116,16 +116,16 @@ const Suppliers = () => {
         emptyDescription="Add suppliers to manage your procurement network."
         renderRow={(supplier) => (
           <TableRow key={supplier._id}>
-            <TableCell><span className="font-medium text-secondary-900">{supplier.name}</span></TableCell>
-            <TableCell className="text-secondary-500">{supplier.email ?? "-"}</TableCell>
-            <TableCell className="text-secondary-500">{supplier.phone ?? "-"}</TableCell>
+            <TableCell><span className="font-semibold text-secondary-900 dark:text-white">{supplier.name}</span></TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{supplier.email ?? "-"}</TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{supplier.phone ?? "-"}</TableCell>
             <TableCell>
               <div className="flex items-center gap-1">
                 <Star size={14} className="fill-warning-500 text-warning-500" />
-                <span className="font-medium">{supplier.rating ?? "-"}</span>
+                <span className="font-semibold text-secondary-900 dark:text-white">{supplier.rating ?? "-"}</span>
               </div>
             </TableCell>
-            <TableCell>{supplier.deliveryDays ? `${supplier.deliveryDays} days` : "-"}</TableCell>
+            <TableCell className="text-secondary-700 dark:text-slate-200">{supplier.deliveryDays ? `${supplier.deliveryDays} days` : "-"}</TableCell>
             <TableCell>
               <Badge color={supplier.status === "ACTIVE" ? "success" : "secondary"} dot>{supplier.status}</Badge>
             </TableCell>

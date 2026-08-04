@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import Button from "./Button";
@@ -30,26 +31,28 @@ const Modal = ({ open, title, children, onClose, footer, size = "md" }) => {
     xl: "max-w-4xl",
   };
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
+      {/* Full Viewport Blur Overlay */}
       <div
-        className="absolute inset-0 bg-secondary-900/40 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 z-[100] bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       />
 
+      {/* Modal Dialog Card */}
       <div
         className={cn(
-          "relative w-full animate-slide-up rounded-2xl bg-white shadow-modal",
+          "relative z-[101] my-auto w-full animate-slide-up rounded-2xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl text-secondary-900 dark:text-white",
           sizes[size],
         )}
       >
-        <div className="flex items-center justify-between border-b border-secondary-200 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-secondary-900">
+        <div className="flex items-center justify-between border-b border-secondary-200 dark:border-slate-800 px-6 py-4">
+          <h2 id="modal-title" className="font-heading text-lg font-bold text-secondary-900 dark:text-white">
             {title}
           </h2>
 
@@ -58,16 +61,18 @@ const Modal = ({ open, title, children, onClose, footer, size = "md" }) => {
           </Button>
         </div>
 
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-6 py-5 max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar">{children}</div>
 
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-secondary-200 px-6 py-4">
+          <div className="flex justify-end gap-3 border-t border-secondary-200 dark:border-slate-800 px-6 py-4">
             {footer}
           </div>
         )}
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default Modal;

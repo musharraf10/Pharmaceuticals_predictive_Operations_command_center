@@ -29,7 +29,7 @@ const Dropdown = ({
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-2 min-w-[200px] animate-fade-in rounded-xl border border-secondary-200 bg-white py-1.5 shadow-dropdown",
+            "absolute z-50 mt-2 min-w-[200px] animate-fade-in rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 shadow-dropdown",
             align === "right" ? "right-0" : "left-0",
           )}
           onClick={() => setOpen(false)}
@@ -54,8 +54,8 @@ export const DropdownItem = ({
     className={cn(
       "flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[15px] transition-colors duration-150",
       danger
-        ? "text-danger-600 hover:bg-danger-50"
-        : "text-secondary-700 hover:bg-secondary-50",
+        ? "text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-950/30"
+        : "text-secondary-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800",
       className,
     )}
   >
@@ -65,7 +65,7 @@ export const DropdownItem = ({
 );
 
 export const DropdownDivider = () => (
-  <div className="my-1.5 border-t border-secondary-200" />
+  <div className="my-1.5 border-t border-secondary-200 dark:border-slate-800" />
 );
 
 export default Dropdown;

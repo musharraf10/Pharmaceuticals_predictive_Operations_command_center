@@ -1,10 +1,26 @@
-import { createContext, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 
 const LayoutContext = createContext(null);
 
 export const LayoutProvider = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("pharmaops_theme") || "dark";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("pharmaops_theme", theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
 
   const value = useMemo(
     () => ({
@@ -14,8 +30,11 @@ export const LayoutProvider = ({ children }) => {
       mobileSidebarOpen,
       setMobileSidebarOpen,
       toggleMobileSidebar: () => setMobileSidebarOpen((v) => !v),
+      theme,
+      setTheme,
+      toggleTheme,
     }),
-    [sidebarCollapsed, mobileSidebarOpen],
+    [sidebarCollapsed, mobileSidebarOpen, theme],
   );
 
   return (

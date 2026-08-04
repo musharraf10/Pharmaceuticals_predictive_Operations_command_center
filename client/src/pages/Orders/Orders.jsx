@@ -133,16 +133,16 @@ const Orders = () => {
         emptyDescription="Create your first order to start fulfillment."
         renderRow={(order) => (
           <TableRow key={order._id}>
-            <TableCell><span className="font-semibold text-secondary-900">{order.customerName}</span></TableCell>
-            <TableCell><span className="font-medium text-secondary-800">{order.product?.name ?? "-"}</span></TableCell>
-            <TableCell className="font-semibold text-secondary-900">{order.quantity}</TableCell>
-            <TableCell className="text-secondary-600">{order.destination}</TableCell>
-            <TableCell className="text-secondary-500">{formatDate(order.expectedDelivery)}</TableCell>
+            <TableCell><span className="font-semibold text-secondary-900 dark:text-white">{order.customerName}</span></TableCell>
+            <TableCell><span className="font-medium text-secondary-800 dark:text-slate-200">{order.product?.name ?? "-"}</span></TableCell>
+            <TableCell className="font-bold text-secondary-900 dark:text-white">{order.quantity}</TableCell>
+            <TableCell className="text-secondary-600 dark:text-slate-300">{order.destination}</TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{formatDate(order.expectedDelivery)}</TableCell>
             <TableCell className="w-48">
               <select
                 value={order.status}
                 onChange={(e) => updateOrderStatusAsync({ id: order._id, payload: { status: e.target.value } })}
-                className="w-full cursor-pointer rounded-xl border border-secondary-200 bg-secondary-50 px-3 py-1.5 text-xs font-semibold text-secondary-800 transition hover:border-primary-400 focus:border-primary-600 focus:bg-white focus:outline-none"
+                className="w-full cursor-pointer rounded-xl border border-secondary-200 dark:border-slate-700 bg-secondary-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-secondary-800 dark:text-white transition hover:border-primary-400 focus:border-primary-600 focus:outline-none"
               >
                 {statusOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -186,8 +186,8 @@ const Orders = () => {
             <Select label="Status" options={statusOptions} {...form.register("status")} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Remarks</label>
-            <textarea rows={3} className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100" {...form.register("remarks")} />
+            <label className="text-sm font-medium text-secondary-700 dark:text-slate-300">Remarks</label>
+            <textarea rows={3} className="w-full rounded-xl border border-secondary-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-[15px] text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100" {...form.register("remarks")} />
           </div>
         </form>
       </Modal>

@@ -25,33 +25,33 @@ const NotificationCard = ({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full gap-3 rounded-xl border border-secondary-200 border-l-4 bg-white p-4 text-left transition-all duration-200",
+        "flex w-full gap-3 rounded-xl border border-secondary-200 dark:border-slate-800 border-l-4 bg-white dark:bg-slate-900/80 p-4 text-left transition-all duration-200",
         "hover:scale-[1.01] hover:shadow-card-hover",
-        !isRead && "bg-primary-50/30",
+        !isRead && "bg-primary-50/30 dark:bg-slate-800/80",
         typeColors[type],
         className,
       )}
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary-100">
-        <Bell size={16} className="text-secondary-500" />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary-100 dark:bg-slate-800">
+        <Bell size={16} className="text-secondary-500 dark:text-slate-300" />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-[15px] font-medium text-secondary-900">
+          <p className="truncate text-[15px] font-semibold text-secondary-900 dark:text-white">
             {title}
           </p>
           {!isRead && <Badge color="primary" size="sm" dot>New</Badge>}
         </div>
 
         {message && (
-          <p className="mt-0.5 line-clamp-2 text-[13px] text-secondary-500">
+          <p className="mt-0.5 line-clamp-2 text-[13px] text-secondary-500 dark:text-slate-300">
             {message}
           </p>
         )}
 
         {createdAt && (
-          <p className="mt-1.5 text-[13px] text-secondary-400">
+          <p className="mt-1.5 text-[13px] text-secondary-400 dark:text-slate-400">
             {formatRelativeTime(createdAt)}
           </p>
         )}

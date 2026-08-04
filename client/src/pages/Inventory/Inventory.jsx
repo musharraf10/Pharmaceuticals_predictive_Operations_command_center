@@ -123,12 +123,12 @@ const Inventory = () => {
         emptyDescription="Stock levels will appear here once products are added."
         renderRow={(item) => (
           <TableRow key={item._id}>
-            <TableCell><span className="font-medium text-secondary-900">{item.product?.name ?? "-"}</span></TableCell>
-            <TableCell>{item.warehouse}</TableCell>
-            <TableCell><span className="font-semibold text-secondary-900">{item.quantity}</span></TableCell>
-            <TableCell className="text-secondary-500">{item.location || "-"}</TableCell>
+            <TableCell><span className="font-semibold text-secondary-900 dark:text-white">{item.product?.name ?? "-"}</span></TableCell>
+            <TableCell className="font-medium text-secondary-800 dark:text-slate-200">{item.warehouse}</TableCell>
+            <TableCell><span className="font-bold text-secondary-900 dark:text-white">{item.quantity}</span></TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{item.location || "-"}</TableCell>
             <TableCell><StatusBadge statusMap={INVENTORY_STATUS} status={item.status} /></TableCell>
-            <TableCell className="text-secondary-500">{formatDate(item.expiryDate)}</TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{formatDate(item.expiryDate)}</TableCell>
             <TableCell className="text-right whitespace-nowrap">
               <div className="inline-flex items-center justify-end gap-1.5">
                 <Button size="sm" variant="outline" icon={Edit3} onClick={() => openEdit(item)}>Edit</Button>

@@ -21,33 +21,46 @@
 
   * {
     @apply box-border;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
   }
 
   body {
-    @apply bg-secondary-50 font-sans text-[15px] text-secondary-900;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    @apply bg-secondary-50 font-sans text-[15px] text-secondary-900 dark:bg-slate-950 dark:text-slate-100;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     margin: 0;
     min-height: 100vh;
   }
 
-  button {
-    @apply transition-all duration-200;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Headings: Outfit (Geometric, Modern Command Center Font) */
+  h1, h2, h3, h4, h5, h6,
+  .page-title,
+  .section-title,
+  .card-title,
+  .font-heading {
+    font-family: "Outfit", "Inter", system-ui, sans-serif;
   }
 
+  /* Numerical Data, Metrics, Codes: JetBrains Mono */
+  code, pre,
+  .font-mono,
+  .metric-value,
+  .sku-code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  /* UI Controls & Body: Inter */
+  button,
   input,
   textarea,
   select {
     @apply outline-none;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
   }
 
   a {
@@ -70,8 +83,16 @@
   border-radius: 9999px;
 }
 
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 .scrollbar-none {
@@ -83,24 +104,52 @@
   display: none;
 }
 
+/* Ambient concept background animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.15);
+  }
+  66% {
+    transform: translate(-30px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 10s infinite ease-in-out;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2.5s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 5s;
+}
+
 @layer components {
   .page-title {
-    @apply text-[36px] font-bold leading-tight text-secondary-900;
+    @apply text-[36px] font-bold leading-tight text-secondary-900 dark:text-white;
   }
 
   .section-title {
-    @apply text-2xl font-semibold text-secondary-900;
+    @apply text-2xl font-semibold text-secondary-900 dark:text-white;
   }
 
   .card-title {
-    @apply text-lg font-semibold text-secondary-900;
+    @apply text-lg font-semibold text-secondary-900 dark:text-white;
   }
 
   .text-muted {
-    @apply text-[13px] text-secondary-500;
+    @apply text-[13px] text-secondary-500 dark:text-slate-400;
   }
 
   .interactive-card {
-    @apply rounded-xl border border-secondary-200 bg-white p-6 shadow-card transition-all duration-200 hover:scale-[1.01] hover:shadow-card-hover;
+    @apply rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-6 shadow-card transition-all duration-200 hover:scale-[1.01] hover:shadow-card-hover;
   }
 }

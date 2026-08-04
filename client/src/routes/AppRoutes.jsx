@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { LayoutProvider } from "../context/LayoutContext";
 import AppLayout from "../components/layout/AppLayout";
 import Login from "../pages/Auth/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
@@ -23,11 +24,12 @@ import RoleRoute from "./RoleRoute";
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-        </Route>
+    <LayoutProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+          </Route>
 
         <Route path="/unauthorized" element={<Unauthorized />} />
 
@@ -152,6 +154,7 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+    </LayoutProvider>
   );
 };
 

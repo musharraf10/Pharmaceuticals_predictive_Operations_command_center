@@ -19,11 +19,11 @@ const Pagination = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-t border-secondary-200 pt-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 border-t border-secondary-200 dark:border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between",
         className,
       )}
     >
-      <p className="text-[13px] text-secondary-500">
+      <p className="text-[13px] text-secondary-500 dark:text-slate-400">
         Showing {start}–{end} of {totalItems}
       </p>
 
@@ -38,7 +38,7 @@ const Pagination = ({
           Previous
         </Button>
 
-        <span className="px-3 text-sm font-medium text-secondary-700">
+        <span className="px-3 text-sm font-medium text-secondary-700 dark:text-slate-200">
           {page} / {totalPages}
         </span>
 

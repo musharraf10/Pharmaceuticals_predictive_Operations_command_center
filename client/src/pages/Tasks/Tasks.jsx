@@ -145,21 +145,21 @@ const Tasks = () => {
           <TableRow key={task._id}>
             <TableCell>
               <div>
-                <p className="font-semibold text-secondary-900">{task.title}</p>
+                <p className="font-semibold text-secondary-900 dark:text-white">{task.title}</p>
                 {task.description && (
-                  <p className="mt-1 max-w-md truncate text-[13px] text-secondary-500">
+                  <p className="mt-1 max-w-md truncate text-[13px] text-secondary-500 dark:text-slate-300">
                     {task.description}
                   </p>
                 )}
               </div>
             </TableCell>
-            <TableCell className="text-secondary-600 font-medium">
+            <TableCell className="text-secondary-600 dark:text-slate-200 font-medium">
               {task.assignedTo?.name ?? "Unassigned"}
             </TableCell>
             <TableCell>
               <StatusBadge statusMap={TASK_PRIORITY} status={task.priority} />
             </TableCell>
-            <TableCell className="text-secondary-500">{formatDate(task.dueDate)}</TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{formatDate(task.dueDate)}</TableCell>
             <TableCell>
               <StatusBadge statusMap={TASK_STATUS} status={task.status} />
             </TableCell>
@@ -192,10 +192,10 @@ const Tasks = () => {
             {...taskForm.register("title", { required: "Task title is required" })}
           />
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Description</label>
+            <label className="text-sm font-medium text-secondary-700 dark:text-slate-300">Description</label>
             <textarea
               rows={3}
-              className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              className="w-full rounded-xl border border-secondary-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-[15px] text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               {...taskForm.register("description")}
             />
           </div>
@@ -239,10 +239,10 @@ const Tasks = () => {
             <Input label="Due Date" type="date" {...editForm.register("dueDate")} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Description</label>
+            <label className="text-sm font-medium text-secondary-700 dark:text-slate-300">Description</label>
             <textarea
               rows={3}
-              className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              className="w-full rounded-xl border border-secondary-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-[15px] text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               {...editForm.register("description")}
             />
           </div>

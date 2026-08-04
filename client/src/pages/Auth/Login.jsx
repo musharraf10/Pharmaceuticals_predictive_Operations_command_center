@@ -2,87 +2,283 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import {
+    Activity,
+    ArrowRight,
+    CheckCircle2,
+    Dna,
+    Eye,
+    EyeOff,
+    Lock,
+    Mail,
+    Moon,
+    ShieldCheck,
+    Sparkles,
+    Sun,
+} from "lucide-react";
 
-import Card from "../../components/ui/Card";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
 import useAuth from "../../hooks/useAuth";
+import { useLayout } from "../../hooks/useLayout";
 import getErrorMessage from "../../utils/getErrorMessage";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login } = useAuth();
+    const { theme, toggleTheme } = useLayout();
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+    });
 
-  const onSubmit = async (formData) => {
-    try {
-      setLoading(true);
-      await login(formData);
-      navigate("/dashboard");
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Login failed"));
-    } finally {
-      setLoading(false);
-    }
-  };
+    const onSubmit = async (formData) => {
+        try {
+            setLoading(true);
+            await login(formData);
+            toast.success("Welcome to PharmaOps Command Center!");
+            navigate("/dashboard");
+        } catch (error) {
+            toast.error(getErrorMessage(error, "Login failed"));
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary-100 px-4">
-      <Card className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-primary-700">PharmaOps AI</h1>
+    const fillDemoCredentials = () => {
+        setValue("email", "admin@pharma.com", { shouldValidate: true });
+        setValue("password", "Admin@123", { shouldValidate: true });
+        toast.success("Demo credentials loaded!");
+    };
 
-          <p className="mt-2 text-secondary-500">
-            Predictive Operations Command Center
-          </p>
+    return (
+        <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-sky-100/70 via-rose-50/60 to-indigo-100/50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-indigo-950/50 dark:to-slate-950 px-4 py-8 font-sans text-slate-900 dark:text-white transition-colors duration-300">
+            {/* Top Floating Theme Switcher */}
+            <div className="absolute right-6 top-6 z-20">
+                <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-md backdrop-blur-md transition-all duration-200 hover:border-primary-500 hover:scale-105"
+                    title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                >
+                    {theme === "dark" ? (
+                        <>
+                            <Sun size={16} className="text-amber-400" />
+                            <span>Light Mode</span>
+                        </>
+                    ) : (
+                        <>
+                            <Moon size={16} className="text-primary-600" />
+                            <span>Dark Mode</span>
+                        </>
+                    )}
+                </button>
+            </div>
+
+            {/* Animated Ambient Gradient Orbs */}
+            <div className="pointer-events-none absolute -left-20 -top-20 h-[450px] w-[450px] rounded-full bg-sky-300/50 dark:bg-sky-500/25 blur-3xl filter animate-blob" />
+            <div className="pointer-events-none absolute -bottom-20 -right-20 h-[450px] w-[450px] rounded-full bg-pink-300/50 dark:bg-purple-500/25 blur-3xl filter animate-blob animation-delay-2000" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 blur-3xl filter animate-blob animation-delay-4000" />
+
+            {/* Grid Pattern Overlay */}
+            <div
+                className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.03]"
+                style={{
+                    backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`,
+                    backgroundSize: "24px 24px",
+                }}
+            />
+
+            <div className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl transition-all duration-300 lg:grid-cols-12">
+                {/* Left Column: Concept & Branding */}
+                <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 p-8 text-white lg:col-span-7 lg:p-12">
+                    {/* Subtle DNA background watermark */}
+                    <div className="pointer-events-none absolute right-4 top-12 opacity-5">
+                        <Dna size={320} />
+                    </div>
+
+                    <div>
+                        {/* Top Brand Badge */}
+                        <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-primary-500/10 px-3.5 py-1.5 backdrop-blur-md">
+                            <Sparkles size={16} className="text-primary-400" />
+                            <span className="text-xs font-semibold uppercase tracking-wider text-primary-300">
+                                PharmaOps AI Engine
+                            </span>
+                        </div>
+
+                        {/* Title & Tagline */}
+                        <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl lg:leading-tight">
+                            Pharmaceutical Predictive Operations
+                        </h1>
+                        <p className="mt-3 text-base text-slate-300 sm:text-lg">
+                            Next-generation AI command center for real-time supply chain intelligence, SKU forecasting, and quality assurance.
+                        </p>
+
+                        {/* Feature Highlights */}
+                        <div className="mt-8 space-y-3.5">
+                            {[
+                                {
+                                    title: "AI Demand & Inventory Telemetry",
+                                    desc: "Predictive neural models for zero-stockout manufacturing.",
+                                },
+                                {
+                                    title: "GMP & Quality Batch Triage",
+                                    desc: "Automated defect signals and risk-level classification.",
+                                },
+                                {
+                                    title: "End-to-End Delivery Fulfillment",
+                                    desc: "Real-time order dispatch and supplier reliability metrics.",
+                                },
+                            ].map((feat, i) => (
+                                <div
+                                    key={i}
+                                    className="flex items-start gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/50 p-3.5 backdrop-blur-sm transition-all duration-200 hover:border-primary-500/40 hover:bg-slate-800/50"
+                                >
+                                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-600/20 text-primary-400">
+                                        <CheckCircle2 size={16} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-slate-200">{feat.title}</p>
+                                        <p className="text-xs text-slate-400">{feat.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Bottom Live System Indicator */}
+                    <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800/80 pt-6 text-xs text-slate-400">
+                        <div className="flex items-center gap-2">
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                            </span>
+                            <span className="font-medium text-slate-300">Live AI Cluster Active</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+                            <Activity size={14} className="text-primary-400" />
+                            <span>v2.5-Flash Engine</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Interactive Login Form */}
+                <div className="flex flex-col justify-center bg-white/95 dark:bg-slate-900/90 p-8 text-slate-900 dark:text-white transition-colors duration-300 lg:col-span-5 lg:p-10">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Sign In to Command Center</h2>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            Enter your credentials to access operations dashboard.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+                        {/* Email Field */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                Work Email
+                            </label>
+                            <div className="relative">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-400">
+                                    <Mail size={18} />
+                                </div>
+                                <input
+                                    type="email"
+                                    placeholder="admin@pharma.com"
+                                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-3 pl-10 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors focus:border-primary-600 dark:focus:border-primary-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                                    {...register("email", { required: "Email is required" })}
+                                />
+                            </div>
+                            {errors.email && (
+                                <p className="text-xs text-rose-500 dark:text-rose-400">{errors.email.message}</p>
+                            )}
+                        </div>
+
+                        {/* Password Field */}
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                    Password
+                                </label>
+                            </div>
+                            <div className="relative">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-400">
+                                    <Lock size={18} />
+                                </div>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••••••"
+                                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-3 pl-10 pr-11 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors focus:border-primary-600 dark:focus:border-primary-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                                    {...register("password", { required: "Password is required" })}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            {errors.password && (
+                                <p className="text-xs text-rose-500 dark:text-rose-400">{errors.password.message}</p>
+                            )}
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-primary-600 to-blue-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-600/25 transition-all duration-200 hover:from-primary-500 hover:to-blue-500 hover:shadow-primary-600/40 active:scale-[0.99] disabled:opacity-60"
+                        >
+                            {loading ? (
+                                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            ) : (
+                                <>
+                                    <span>Access Operations Center</span>
+                                    <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    {/* Demo Credentials Quick Fill Card */}
+                    <div className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-4 backdrop-blur-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <ShieldCheck size={16} className="text-primary-600 dark:text-primary-400" />
+                                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Demo Environment Access
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={fillDemoCredentials}
+                                className="rounded-lg bg-primary-600/10 dark:bg-primary-600/20 px-2.5 py-1 text-xs font-medium text-primary-700 dark:text-primary-300 transition hover:bg-primary-600/20 dark:hover:bg-primary-600/30 hover:text-primary-900 dark:hover:text-white"
+                            >
+                                Auto Fill
+                            </button>
+                        </div>
+                        <div className="mt-2.5 space-y-1 text-xs font-mono text-slate-600 dark:text-slate-400">
+                            <p>
+                                <span className="text-slate-500 dark:text-slate-500">Email:</span> admin@pharma.com
+                            </p>
+                            <p>
+                                <span className="text-slate-500 dark:text-slate-500">Password:</span> Admin@123
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="Enter your email"
-            error={errors.email?.message}
-            {...register("email", {
-              required: "Email is required",
-            })}
-          />
-
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            error={errors.password?.message}
-            {...register("password", {
-              required: "Password is required",
-            })}
-          />
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"}
-          </Button>
-        </form>
-
-        <div className="mt-6 rounded-xl bg-secondary-50 p-4 text-sm">
-          <p className="font-semibold text-secondary-700">Demo Credentials</p>
-
-          <p className="mt-2">
-            <strong>Email:</strong> admin@gmail.com
-          </p>
-
-          <p>
-            <strong>Password:</strong> Admin@123
-          </p>
-        </div>
-      </Card>
-    </div>
-  );
+    );
 };
 
 export default Login;

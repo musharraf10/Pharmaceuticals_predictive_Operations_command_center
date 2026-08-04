@@ -22,21 +22,21 @@ const Table = ({
   return (
     <div
       className={cn(
-        "rounded-xl border border-secondary-200 bg-white shadow-card",
+        "rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-card transition-colors duration-200",
         className,
       )}
     >
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left">
-          <thead className="sticky top-0 z-10 bg-secondary-100/75 backdrop-blur-md">
-            <tr className="border-b border-secondary-200">
+          <thead className="sticky top-0 z-10 bg-secondary-100/75 dark:bg-slate-800/80 backdrop-blur-md">
+            <tr className="border-b border-secondary-200 dark:border-slate-800">
               {columns.map((col) => (
                 <th
                   key={col.key ?? col.header}
                   scope="col"
                   className={cn(
-                    "px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-secondary-600",
-                    col.sortable && "cursor-pointer select-none hover:text-secondary-900 transition-colors",
+                    "px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-secondary-600 dark:text-slate-300",
+                    col.sortable && "cursor-pointer select-none hover:text-secondary-900 dark:hover:text-white transition-colors",
                     col.className,
                   )}
                   onClick={
@@ -59,7 +59,7 @@ const Table = ({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-secondary-100/80 bg-white">{children}</tbody>
+          <tbody className="divide-y divide-secondary-100/80 dark:divide-slate-800/80 bg-white dark:bg-slate-900 text-secondary-900 dark:text-slate-100">{children}</tbody>
         </table>
       </div>
     </div>
@@ -70,7 +70,7 @@ export const TableRow = ({ children, className = "", onClick }) => (
   <tr
     onClick={onClick}
     className={cn(
-      "group transition-colors duration-150 hover:bg-secondary-50/80",
+      "group transition-colors duration-150 hover:bg-secondary-50/80 dark:hover:bg-slate-800/60",
       onClick && "cursor-pointer",
       className,
     )}
@@ -80,7 +80,7 @@ export const TableRow = ({ children, className = "", onClick }) => (
 );
 
 export const TableCell = ({ children, className = "" }) => (
-  <td className={cn("px-5 py-4 text-[14px] text-secondary-700 align-middle", className)}>
+  <td className={cn("px-5 py-4 text-[14px] text-secondary-700 dark:text-slate-200 align-middle", className)}>
     {children}
   </td>
 );

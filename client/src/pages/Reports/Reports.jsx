@@ -26,16 +26,18 @@ import { exportCsv } from "../../utils/exportCsv";
 import { formatDateTime } from "../../utils/formatDate";
 import { COMPLAINT_STATUS, INVENTORY_STATUS, TASK_STATUS } from "../../utils/statusConfig";
 
-const COLORS = ["#2563EB", "#16A34A", "#F59E0B", "#DC2626", "#0891B2", "#7C3AED"];
+import { useLayout } from "../../hooks/useLayout";
+
+const COLORS = ["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#06B6D4", "#8B5CF6"];
 
 const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-xl border border-secondary-200 bg-white px-4 py-3 shadow-dropdown">
-      <p className="mb-1 text-[13px] font-medium text-secondary-500">{label}</p>
+    <div className="rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-dropdown text-secondary-900 dark:text-white">
+      <p className="mb-1 text-[13px] font-medium text-secondary-500 dark:text-slate-400">{label}</p>
       {payload.map((entry) => (
-        <p key={entry.name} className="text-sm font-semibold text-secondary-900">
+        <p key={entry.name} className="text-sm font-semibold text-secondary-900 dark:text-white">
           {entry.name}: {entry.value}
         </p>
       ))}
@@ -55,6 +57,11 @@ const toChartData = (counts) =>
 
 const Reports = () => {
   const reports = useReports();
+  const { theme } = useLayout();
+
+  const isDark = theme === "dark";
+  const gridColor = isDark ? "#334155" : "#E2E8F0";
+  const tickColor = isDark ? "#CBD5E1" : "#64748B";
 
   const loading = Object.values(reports).some((report) => report.isLoading);
   const error = Object.values(reports).some((report) => report.isError);
@@ -145,9 +152,9 @@ const Reports = () => {
         <ChartCard title="Order Pipeline" subtitle="Fulfillment state across reported orders">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={orderPipeline} barSize={28}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip />} />
               <Bar dataKey="value" name="Orders" radius={[6, 6, 0, 0]}>
                 {orderPipeline.map((_, index) => (
@@ -180,11 +187,11 @@ const Reports = () => {
           />
           <div className="grid gap-3 sm:grid-cols-2">
             {inventory.filter((item) => item.status !== "AVAILABLE").slice(0, 4).map((item) => (
-              <div key={item._id} className="rounded-xl border border-secondary-200 p-4">
+              <div key={item._id} className="rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-secondary-900">{item.product?.name ?? "Inventory item"}</p>
-                    <p className="mt-1 text-[13px] text-secondary-500">
+                    <p className="font-semibold text-secondary-900 dark:text-white">{item.product?.name ?? "Inventory item"}</p>
+                    <p className="mt-1 text-[13px] text-secondary-500 dark:text-slate-300">
                       {item.warehouse} - Qty {item.quantity}
                     </p>
                   </div>
@@ -193,11 +200,11 @@ const Reports = () => {
               </div>
             ))}
             {complaints.filter((item) => item.status !== "CLOSED").slice(0, 4).map((item) => (
-              <div key={item._id} className="rounded-xl border border-secondary-200 p-4">
+              <div key={item._id} className="rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-secondary-900">{item.title}</p>
-                    <p className="mt-1 text-[13px] text-secondary-500">{item.product?.name ?? "Product"} complaint</p>
+                    <p className="font-semibold text-secondary-900 dark:text-white">{item.title}</p>
+                    <p className="mt-1 text-[13px] text-secondary-500 dark:text-slate-300">{item.product?.name ?? "Product"} complaint</p>
                   </div>
                   <StatusBadge statusMap={COMPLAINT_STATUS} status={item.status} />
                 </div>
@@ -217,9 +224,9 @@ const Reports = () => {
               ["Complaints", complaints.length],
               ["Tasks", tasks.length],
             ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between rounded-xl bg-secondary-50 px-4 py-3">
-                <span className="text-[15px] font-medium text-secondary-700">{label}</span>
-                <span className="text-lg font-bold text-secondary-900">{value}</span>
+              <div key={label} className="flex items-center justify-between rounded-xl bg-secondary-50 dark:bg-slate-800/80 px-4 py-3">
+                <span className="text-[15px] font-medium text-secondary-700 dark:text-slate-200">{label}</span>
+                <span className="text-lg font-bold text-secondary-900 dark:text-white">{value}</span>
               </div>
             ))}
           </div>
@@ -231,9 +238,9 @@ const Reports = () => {
           <CardHeader title="Task Status" subtitle="Execution load by state" />
           <div className="space-y-3">
             {taskMix.map((item) => (
-              <div key={item.name} className="flex items-center justify-between rounded-xl border border-secondary-200 px-4 py-3">
+              <div key={item.name} className="flex items-center justify-between rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-4 py-3">
                 <StatusBadge statusMap={TASK_STATUS} status={item.name} />
-                <span className="font-semibold text-secondary-900">{item.value}</span>
+                <span className="font-bold text-secondary-900 dark:text-white">{item.value}</span>
               </div>
             ))}
           </div>
@@ -244,16 +251,16 @@ const Reports = () => {
           <div className="space-y-3">
             {forecastRisk.length > 0 ? (
               forecastRisk.map((item, index) => (
-                <div key={item.name} className="flex items-center gap-3 rounded-xl border border-secondary-200 px-4 py-3">
+                <div key={item.name} className="flex items-center gap-3 rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-4 py-3">
                   <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                  <span className="flex-1 text-[15px] font-medium text-secondary-700">{item.name}</span>
-                  <span className="font-semibold text-secondary-900">{item.value}</span>
+                  <span className="flex-1 text-[15px] font-medium text-secondary-700 dark:text-slate-200">{item.name}</span>
+                  <span className="font-bold text-secondary-900 dark:text-white">{item.value}</span>
                 </div>
               ))
             ) : (
-              <div className="rounded-xl border border-dashed border-secondary-300 p-8 text-center">
-                <FileBarChart2 className="mx-auto text-secondary-400" size={28} />
-                <p className="mt-3 text-[15px] text-secondary-500">Forecast risk data will appear after a forecast run.</p>
+              <div className="rounded-xl border border-dashed border-secondary-300 dark:border-slate-800 p-8 text-center">
+                <FileBarChart2 className="mx-auto text-secondary-400 dark:text-slate-400" size={28} />
+                <p className="mt-3 text-[15px] text-secondary-500 dark:text-slate-400">Forecast risk data will appear after a forecast run.</p>
               </div>
             )}
           </div>

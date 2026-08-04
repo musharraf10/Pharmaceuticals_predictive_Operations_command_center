@@ -21,6 +21,7 @@ import KPICard from "../../components/ui/KPICard";
 import Loader from "../../components/ui/Loader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { useForecast } from "../../hooks/useForecast";
+import { useLayout } from "../../hooks/useLayout";
 import { formatDate } from "../../utils/formatDate";
 import { formatNumber } from "../../utils/formatCurrency";
 import { RISK_LEVEL } from "../../utils/statusConfig";
@@ -38,6 +39,11 @@ const columns = [
 
 const Forecast = () => {
   const { forecasts, isLoading, isError, runForecastAsync, isRunning } = useForecast();
+  const { theme } = useLayout();
+
+  const isDark = theme === "dark";
+  const gridColor = isDark ? "#334155" : "#E2E8F0";
+  const tickColor = isDark ? "#CBD5E1" : "#64748B";
 
   if (isLoading) return <Loader fullScreen />;
 
@@ -93,11 +99,11 @@ const Forecast = () => {
         <ChartCard title="Predicted Demand" subtitle="Top products by forecasted demand">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} barSize={28}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
               <Tooltip />
-              <Bar dataKey="demand" name="Demand" fill="#2563EB" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="demand" name="Demand" fill="#3B82F6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -108,12 +114,12 @@ const Forecast = () => {
             {riskDistribution.map((item, i) => (
               <div key={item.name} className="text-center">
                 <div
-                  className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white"
+                  className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white shadow-lg"
                   style={{ backgroundColor: CHART_COLORS[i] }}
                 >
                   {item.value}
                 </div>
-                <p className="mt-2 text-[13px] font-medium text-secondary-600">{item.name} Risk</p>
+                <p className="mt-2 text-[13px] font-semibold text-secondary-600 dark:text-slate-300">{item.name} Risk</p>
               </div>
             ))}
           </div>
@@ -121,14 +127,14 @@ const Forecast = () => {
       </div>
 
       {forecasts.length > 0 && forecasts[0]?.recommendation && (
-        <Card className="border-primary-200 bg-primary-50/30">
+        <Card className="border-primary-200 dark:border-primary-900/50 bg-primary-50/30 dark:bg-primary-950/40">
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100">
-              <Sparkles size={18} className="text-primary-600" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/60">
+              <Sparkles size={18} className="text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <p className="font-semibold text-secondary-900">Latest AI Recommendation</p>
-              <p className="mt-1 text-[15px] text-secondary-600">
+              <p className="font-bold text-secondary-900 dark:text-white">Latest AI Recommendation</p>
+              <p className="mt-1 text-[15px] font-medium text-secondary-700 dark:text-slate-200">
                 {forecasts[0].recommendation}
               </p>
             </div>
@@ -146,11 +152,11 @@ const Forecast = () => {
         renderRow={(forecast) => (
           <TableRow key={forecast._id}>
             <TableCell>
-              <span className="font-medium text-secondary-900">
+              <span className="font-semibold text-secondary-900 dark:text-white">
                 {forecast.product?.name ?? "—"}
               </span>
             </TableCell>
-            <TableCell className="font-semibold">
+            <TableCell className="font-bold text-secondary-900 dark:text-white">
               {formatNumber(forecast.predictedDemand)} units
             </TableCell>
             <TableCell>
@@ -161,10 +167,10 @@ const Forecast = () => {
             <TableCell>
               <StatusBadge statusMap={RISK_LEVEL} status={forecast.riskLevel} />
             </TableCell>
-            <TableCell className="text-[13px] text-secondary-500">
+            <TableCell className="text-[13px] text-secondary-500 dark:text-slate-300">
               {forecast.modelVersion}
             </TableCell>
-            <TableCell className="text-secondary-500">
+            <TableCell className="text-secondary-500 dark:text-slate-300">
               {formatDate(forecast.generatedAt)}
             </TableCell>
           </TableRow>

@@ -4,14 +4,17 @@ import Inventory from "../models/Inventory.js";
 import Order from "../models/Order.js";
 import Complaint from "../models/Complaint.js";
 import ProductionBatch from "../models/ProductionBatch.js";
+import { generateForecastAnalysis } from "./gemini.service.js";
 
 export const generateForecast = async () => {
   const products = await Product.find();
 
+  // Clear previous forecasts to store new AI prediction run
+  await Forecast.deleteMany({});
+
   const forecasts = [];
 
   for (const product of products) {
-    // Run all database queries for a product in parallel
     const [
       inventory,
       totalOrders,
@@ -40,80 +43,74 @@ export const generateForecast = async () => {
     const currentStock = inventory?.quantity || 0;
     const reorderLevel = product.reorderLevel || 0;
 
-    // 1. Predicted Demand Calculation
-    const predictedDemand =
-      deliveredOrders +
-      pendingOrders +
-      Math.max(reorderLevel - currentStock, 0);
+    // Call Real-Time Google Gemini AI API Prediction Service
+    const aiPrediction = await generateForecastAnalysis({
+      productName: product.name,
+      category: product.category,
+      currentStock,
+      reorderLevel,
+      pendingOrders,
+      deliveredOrders,
+      totalOrders,
+      activeBatches,
+      complaintCount,
+    });
 
-    // 2. Risk Score Calculation
-    let riskScore = 0;
+    let predictedDemand;
+    let confidence;
+    let riskLevel;
+    let recommendation;
+    let explanation;
+    let modelVersion;
 
-    if (currentStock < reorderLevel) riskScore += 40;
-    if (pendingOrders > currentStock) riskScore += 30;
-    if (complaintCount > 3) riskScore += 15;
-    if (activeBatches === 0) riskScore += 15;
+    if (aiPrediction) {
+      predictedDemand = aiPrediction.predictedDemand;
+      confidence = aiPrediction.confidence;
+      riskLevel = aiPrediction.riskLevel;
+      recommendation = aiPrediction.recommendation;
+      explanation = aiPrediction.explanation;
+      modelVersion = aiPrediction.usedModel || "Gemini AI";
+    } else {
+      // Fallback baseline if API quota or connection issue occurs
+      predictedDemand =
+        deliveredOrders + pendingOrders + Math.max(reorderLevel - currentStock, 0);
 
-    let riskLevel = "LOW";
-    if (riskScore >= 70 || currentStock < reorderLevel) {
-      riskLevel = "HIGH";
-    } else if (riskScore >= 40 || currentStock < reorderLevel * 2) {
-      riskLevel = "MEDIUM";
+      let riskScore = 0;
+      if (currentStock < reorderLevel) riskScore += 40;
+      if (pendingOrders > currentStock) riskScore += 30;
+      if (complaintCount > 3) riskScore += 15;
+      if (activeBatches === 0) riskScore += 15;
+
+      if (riskScore >= 70 || currentStock < reorderLevel) {
+        riskLevel = "HIGH";
+      } else if (riskScore >= 40 || currentStock < reorderLevel * 2) {
+        riskLevel = "MEDIUM";
+      } else {
+        riskLevel = "LOW";
+      }
+
+      confidence = Math.max(85 - (totalOrders < 5 ? 20 : 0) - (complaintCount > 3 ? 5 : 0), 60);
+
+      recommendation =
+        riskLevel === "HIGH"
+          ? "Increase production immediately, replenish inventory, and reorder raw materials."
+          : riskLevel === "MEDIUM"
+          ? "Monitor demand closely, prepare the next production batch, and schedule additional production."
+          : "Current operations and stock levels are stable.";
+
+      explanation = `Baseline Telemetry: Delivered (${deliveredOrders}), Pending (${pendingOrders}), Current Stock (${currentStock}), Active Batches (${activeBatches}).`;
+      modelVersion = "Heuristic Baseline";
     }
 
-    // 3. Confidence Calculation
-    let confidence = 95;
-
-    if (totalOrders < 5) confidence -= 20;
-    else if (totalOrders < 20) confidence -= 10;
-
-    if (complaintCount > 3) confidence -= 5;
-    if (activeBatches === 0) confidence -= 10;
-
-    confidence = Math.max(confidence, 60);
-
-    // 4. Recommendation Logic
-    let recommendation = "Current operations and stock levels are stable.";
-
-    if (riskLevel === "HIGH") {
-      recommendation =
-        "Increase production immediately, replenish inventory, and reorder raw materials.";
-    } else if (riskLevel === "MEDIUM") {
-      recommendation =
-        "Monitor demand closely, prepare the next production batch, and schedule additional production.";
-    }
-
-    // const aiResponse = await generateForecastAnalysis({
-    //   currentStock,
-
-    //   reorderLevel: product.reorderLevel,
-
-    //   pendingOrders,
-
-    //   deliveredOrders,
-
-    //   complaintCount,
-
-    //   activeBatches,
-    // });
-    // recommendation: aiResponse;
-
-    // 5. Create Forecast Record
     const forecast = await Forecast.create({
       product: product._id,
       predictedDemand,
       confidence,
       riskLevel,
       recommendation,
-      modelVersion: "gemini-2.5-flash-v1",
+      modelVersion,
       generatedAt: new Date(),
-      explanation: `Forecast generated using:
-
-        Delivered Orders : ${deliveredOrders}
-        Pending Orders : ${pendingOrders}
-        Current Stock : ${currentStock}
-        Active Production : ${activeBatches}
-        Complaints : ${complaintCount}`,
+      explanation,
       inputSnapshot: {
         currentStock,
         deliveredOrders,

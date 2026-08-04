@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import Button from "./Button";
@@ -23,37 +24,39 @@ const Drawer = ({ open, title, children, onClose, footer, width = "max-w-md" }) 
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+  const drawerContent = (
+    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
       <div
-        className="absolute inset-0 bg-secondary-900/40 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       />
 
       <div
         className={cn(
-          "absolute right-0 top-0 flex h-full w-full flex-col bg-white shadow-modal animate-slide-up",
+          "relative z-[101] ml-auto flex h-full w-full flex-col border-l border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-secondary-900 dark:text-white shadow-2xl animate-slide-up",
           width,
         )}
       >
-        <div className="flex items-center justify-between border-b border-secondary-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-secondary-900">{title}</h2>
+        <div className="flex items-center justify-between border-b border-secondary-200 dark:border-slate-800 px-6 py-4">
+          <h2 className="font-heading text-lg font-bold text-secondary-900 dark:text-white">{title}</h2>
 
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X size={20} />
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-5 custom-scrollbar">{children}</div>
 
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-secondary-200 px-6 py-4">
+          <div className="flex justify-end gap-3 border-t border-secondary-200 dark:border-slate-800 px-6 py-4">
             {footer}
           </div>
         )}
       </div>
     </div>
   );
+
+  return createPortal(drawerContent, document.body);
 };
 
 export default Drawer;

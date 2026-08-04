@@ -124,15 +124,15 @@ const Approvals = () => {
               .filter((forecast) => !reviewedForecastIds.has(forecast._id))
               .slice(0, 6)
               .map((forecast) => (
-                <div key={forecast._id} className="rounded-xl border border-secondary-200 p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-card">
+                <div key={forecast._id} className="rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-card">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-secondary-900">{forecast.product?.name ?? "Product"}</p>
-                      <p className="mt-1 text-[13px] text-secondary-500">{forecast.predictedDemand} predicted units</p>
+                      <p className="font-semibold text-secondary-900 dark:text-white">{forecast.product?.name ?? "Product"}</p>
+                      <p className="mt-1 text-[13px] text-secondary-500 dark:text-slate-300">{forecast.predictedDemand} predicted units</p>
                     </div>
                     <StatusBadge statusMap={RISK_LEVEL} status={forecast.riskLevel} />
                   </div>
-                  <p className="mt-3 line-clamp-2 text-[13px] text-secondary-500">
+                  <p className="mt-3 line-clamp-2 text-[13px] text-secondary-500 dark:text-slate-300">
                     {forecast.recommendation || forecast.explanation || "Review forecast confidence and operational risk before approval."}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -157,14 +157,14 @@ const Approvals = () => {
           <TableRow key={approval._id}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50">
-                  <FileCheck2 size={16} className="text-primary-600" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-900/40">
+                  <FileCheck2 size={16} className="text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-secondary-900">
+                  <p className="font-semibold text-secondary-900 dark:text-white">
                     {approval.forecast?.product?.name ?? "Forecast"}
                   </p>
-                  <p className="text-[13px] text-secondary-500">
+                  <p className="text-[13px] text-secondary-500 dark:text-slate-300">
                     Demand {approval.forecast?.predictedDemand ?? "-"} units
                   </p>
                 </div>
@@ -173,13 +173,13 @@ const Approvals = () => {
             <TableCell>
               <StatusBadge statusMap={APPROVAL_STATUS} status={approval.decision} />
             </TableCell>
-            <TableCell className="text-secondary-500">
+            <TableCell className="text-secondary-500 dark:text-slate-300">
               {approval.reviewer?.name ?? "System"}
             </TableCell>
-            <TableCell className="max-w-sm truncate text-secondary-500">
+            <TableCell className="max-w-sm truncate text-secondary-500 dark:text-slate-300">
               {approval.reason || "No reason provided"}
             </TableCell>
-            <TableCell className="text-secondary-500">{formatDate(approval.approvedAt)}</TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{formatDate(approval.approvedAt)}</TableCell>
             <TableCell className="text-right whitespace-nowrap">
               <Button size="sm" variant="ghost" icon={Trash2} onClick={() => deleteApprovalAsync(approval._id)}>
                 Delete
@@ -211,10 +211,10 @@ const Approvals = () => {
           />
           <Select label="Decision" options={decisionOptions} {...approvalForm.register("decision")} />
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Reason</label>
+            <label className="text-sm font-medium text-secondary-700 dark:text-slate-300">Reason</label>
             <textarea
               rows={4}
-              className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              className="w-full rounded-xl border border-secondary-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-[15px] text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               {...approvalForm.register("reason")}
             />
           </div>

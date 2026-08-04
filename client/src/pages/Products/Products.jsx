@@ -118,16 +118,16 @@ const Products = () => {
 
       <div className="grid gap-6 sm:grid-cols-3">
         <div className="interactive-card">
-          <p className="text-[13px] font-medium uppercase tracking-wide text-secondary-500">Total Products</p>
-          <p className="mt-2 text-3xl font-bold text-secondary-900">{products.length}</p>
+          <p className="text-[13px] font-semibold uppercase tracking-wide text-secondary-500 dark:text-slate-300">Total Products</p>
+          <p className="mt-2 text-3xl font-extrabold text-secondary-900 dark:text-white">{products.length}</p>
         </div>
         <div className="interactive-card">
-          <p className="text-[13px] font-medium uppercase tracking-wide text-secondary-500">Active SKUs</p>
-          <p className="mt-2 text-3xl font-bold text-success-600">{products.filter((p) => p.isActive).length}</p>
+          <p className="text-[13px] font-semibold uppercase tracking-wide text-secondary-500 dark:text-slate-300">Active SKUs</p>
+          <p className="mt-2 text-3xl font-extrabold text-success-600 dark:text-success-400">{products.filter((p) => p.isActive).length}</p>
         </div>
         <div className="interactive-card">
-          <p className="text-[13px] font-medium uppercase tracking-wide text-secondary-500">Categories</p>
-          <p className="mt-2 text-3xl font-bold text-primary-600">{new Set(products.map((p) => p.category)).size}</p>
+          <p className="text-[13px] font-semibold uppercase tracking-wide text-secondary-500 dark:text-slate-300">Categories</p>
+          <p className="mt-2 text-3xl font-extrabold text-primary-600 dark:text-primary-400">{new Set(products.map((p) => p.category)).size}</p>
         </div>
       </div>
 
@@ -142,16 +142,16 @@ const Products = () => {
           <TableRow key={product._id}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50">
-                  <Package size={16} className="text-primary-600" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-900/40">
+                  <Package size={16} className="text-primary-600 dark:text-primary-400" />
                 </div>
-                <span className="font-medium text-secondary-900">{product.name}</span>
+                <span className="font-semibold text-secondary-900 dark:text-white">{product.name}</span>
               </div>
             </TableCell>
-            <TableCell><code className="rounded-md bg-secondary-100 px-2 py-0.5 text-[13px]">{product.sku}</code></TableCell>
-            <TableCell>{product.category}</TableCell>
-            <TableCell>{product.manufacturer}</TableCell>
-            <TableCell className="font-medium">{formatCurrency(product.unitPrice)}</TableCell>
+            <TableCell><code className="rounded-md bg-secondary-100 dark:bg-slate-800 px-2 py-1 text-xs font-semibold text-secondary-800 dark:text-slate-200">{product.sku}</code></TableCell>
+            <TableCell className="font-medium text-secondary-800 dark:text-slate-200">{product.category}</TableCell>
+            <TableCell className="text-secondary-600 dark:text-slate-300">{product.manufacturer}</TableCell>
+            <TableCell className="font-semibold text-secondary-900 dark:text-white">{formatCurrency(product.unitPrice)}</TableCell>
             <TableCell>
               <Badge color={product.isActive ? "success" : "secondary"} dot>{product.isActive ? "Active" : "Inactive"}</Badge>
             </TableCell>
@@ -194,8 +194,8 @@ const Products = () => {
             <Select label="Status" options={[{ label: "Active", value: "true" }, { label: "Inactive", value: "false" }]} {...form.register("isActive")} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Description</label>
-            <textarea rows={3} className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100" {...form.register("description")} />
+            <label className="text-sm font-medium text-secondary-700 dark:text-slate-300">Description</label>
+            <textarea rows={3} className="w-full rounded-xl border border-secondary-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-[15px] text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100" {...form.register("description")} />
           </div>
         </form>
       </Modal>

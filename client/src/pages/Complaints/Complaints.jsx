@@ -144,23 +144,23 @@ const Complaints = () => {
           <TableRow key={complaint._id}>
             <TableCell>
               <div>
-                <p className="font-semibold text-secondary-900">{complaint.title}</p>
+                <p className="font-semibold text-secondary-900 dark:text-white">{complaint.title}</p>
                 {complaint.resolution && (
-                  <p className="mt-1 max-w-sm truncate text-[13px] text-secondary-500">
+                  <p className="mt-1 max-w-sm truncate text-[13px] text-secondary-500 dark:text-slate-300">
                     Resolution: {complaint.resolution}
                   </p>
                 )}
               </div>
             </TableCell>
-            <TableCell><span className="font-medium text-secondary-800">{complaint.product?.name ?? "Unavailable"}</span></TableCell>
-            <TableCell className="text-secondary-600">{complaint.reportedBy}</TableCell>
+            <TableCell><span className="font-medium text-secondary-800 dark:text-slate-200">{complaint.product?.name ?? "Unavailable"}</span></TableCell>
+            <TableCell className="text-secondary-600 dark:text-slate-300">{complaint.reportedBy}</TableCell>
             <TableCell>
               <StatusBadge statusMap={SEVERITY} status={complaint.severity} />
             </TableCell>
             <TableCell>
               <StatusBadge statusMap={COMPLAINT_STATUS} status={complaint.status} />
             </TableCell>
-            <TableCell className="text-secondary-500">{formatDate(complaint.createdAt)}</TableCell>
+            <TableCell className="text-secondary-500 dark:text-slate-300">{formatDate(complaint.createdAt)}</TableCell>
             <TableCell className="text-right whitespace-nowrap">
               <div className="inline-flex items-center justify-end gap-1.5">
                 <Button size="sm" variant="outline" icon={Edit3} onClick={() => openEdit(complaint)}>Edit</Button>
@@ -207,17 +207,17 @@ const Complaints = () => {
             {...complaintForm.register("reportedBy", { required: "Reporter is required" })}
           />
           {selectedComplaint && (
-            <div className="grid gap-4 sm:grid-cols-2 rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+            <div className="grid gap-4 sm:grid-cols-2 rounded-xl border border-secondary-200 dark:border-slate-800 bg-secondary-50 dark:bg-slate-800/80 p-4">
               <Select label="Resolution Status" options={statusOptions} {...complaintForm.register("status")} />
               <Input label="Resolution / Corrective Action Notes" placeholder="Detail action taken..." {...complaintForm.register("resolution")} />
             </div>
           )}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Detailed Complaint Description</label>
+            <label className="text-sm font-medium text-secondary-700 dark:text-slate-300">Detailed Complaint Description</label>
             <textarea
               rows={4}
               placeholder="Provide context, batch details, or quality observation..."
-              className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              className="w-full rounded-xl border border-secondary-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-[15px] text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               {...complaintForm.register("description", { required: "Description is required" })}
             />
             {complaintForm.formState.errors.description && (
