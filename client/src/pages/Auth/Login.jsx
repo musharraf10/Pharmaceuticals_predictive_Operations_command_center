@@ -60,9 +60,9 @@ const Login = () => {
     };
 
     return (
-        <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-sky-100/70 via-rose-50/60 to-indigo-100/50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-indigo-950/50 dark:to-slate-950 px-4 py-8 font-sans text-slate-900 dark:text-white transition-colors duration-300">
+        <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-sky-100/70 via-rose-50/60 to-indigo-100/50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-indigo-950/50 dark:to-slate-950 p-4 font-sans text-slate-900 dark:text-white transition-colors duration-300">
             {/* Top Floating Theme Switcher */}
-            <div className="absolute right-6 top-6 z-20">
+            <div className="absolute right-4 top-4 sm:right-6 sm:top-6 z-20">
                 <button
                     type="button"
                     onClick={toggleTheme}
@@ -97,9 +97,10 @@ const Login = () => {
                 }}
             />
 
-            <div className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl transition-all duration-300 lg:grid-cols-12">
-                {/* Left Column: Concept & Branding */}
-                <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 p-8 text-white lg:col-span-7 lg:p-12">
+            {/* Main Centered Container */}
+            <div className="relative z-10 grid w-full max-w-sm sm:max-w-md lg:max-w-5xl overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl transition-all duration-300 lg:grid-cols-12">
+                {/* Left Column: Concept & Branding (Hidden on mobile/tablet, visible on desktop) */}
+                <div className="relative hidden lg:flex lg:col-span-7 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 p-8 lg:p-12 text-white">
                     {/* Subtle DNA background watermark */}
                     <div className="pointer-events-none absolute right-4 top-12 opacity-5">
                         <Dna size={320} />
@@ -170,8 +171,8 @@ const Login = () => {
                     </div>
                 </div>
 
-                {/* Right Column: Interactive Login Form */}
-                <div className="flex flex-col justify-center bg-white/95 dark:bg-slate-900/90 p-8 text-slate-900 dark:text-white transition-colors duration-300 lg:col-span-5 lg:p-10">
+                {/* Right Column: Interactive Login Form (Takes full width on mobile/tablet, 5 cols on desktop) */}
+                <div className="flex flex-col justify-center bg-white/95 dark:bg-slate-900/90 p-6 sm:p-8 lg:p-10 text-slate-900 dark:text-white transition-colors duration-300 lg:col-span-5">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Sign In to Command Center</h2>
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
