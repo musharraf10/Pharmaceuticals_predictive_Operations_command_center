@@ -20,9 +20,20 @@ import usersRoutes from "./routes/user.routes.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://pharmacenter.netlify.app",
+];
+
 app.use(
   cors({
-    origin: "https://pharmacenter.netlify.app",
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
