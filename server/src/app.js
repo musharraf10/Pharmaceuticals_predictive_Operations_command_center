@@ -22,7 +22,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://pharmaceuticals-predictive-operations.onrender.com",
     credentials: true,
   }),
 );
