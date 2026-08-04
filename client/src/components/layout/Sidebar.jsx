@@ -56,7 +56,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+      <nav className="flex-1 space-y-1 p-3 overflow-y-auto scrollbar-none">
         {visibleItems.map((item) => {
           const Icon = item.icon;
 
@@ -117,7 +117,7 @@ const Sidebar = () => {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-secondary-900 text-white transition-all duration-250 lg:sticky lg:top-0 lg:z-auto lg:h-screen",
+          "fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden bg-secondary-900 text-white transition-all duration-250 lg:sticky lg:top-0 lg:z-auto lg:h-screen",
           sidebarCollapsed ? "w-sidebar-collapsed" : "w-sidebar",
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}

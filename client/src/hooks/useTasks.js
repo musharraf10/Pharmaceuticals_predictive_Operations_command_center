@@ -47,6 +47,17 @@ export const useTasks = (params = {}) => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }) => taskService.updateTask(id, payload),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      toast.success(response.message || "Task updated successfully");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Failed to update task"));
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: taskService.deleteTask,
     onSuccess: (response) => {
@@ -71,11 +82,14 @@ export const useTasks = (params = {}) => {
     assignTaskAsync: assignMutation.mutateAsync,
     updateTaskStatus: updateStatusMutation.mutate,
     updateTaskStatusAsync: updateStatusMutation.mutateAsync,
+    updateTask: updateMutation.mutate,
+    updateTaskAsync: updateMutation.mutateAsync,
     deleteTask: deleteMutation.mutate,
     deleteTaskAsync: deleteMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isAssigning: assignMutation.isPending,
     isUpdatingStatus: updateStatusMutation.isPending,
+    isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
   };
 };

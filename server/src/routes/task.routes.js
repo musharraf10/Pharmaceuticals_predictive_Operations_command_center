@@ -6,6 +6,7 @@ import {
   getTaskById,
   assignTask,
   updateTaskStatus,
+  updateTask,
   deleteTask,
 } from "../controllers/task.controller.js";
 
@@ -32,6 +33,7 @@ router.patch(
 router
   .route("/:id")
   .get(authorize("ADMIN", "MANAGER", "ANALYST", "OPERATOR"), getTaskById)
+  .put(authorize("ADMIN", "MANAGER", "OPERATOR"), updateTask)
   .delete(authorize("ADMIN"), deleteTask);
 
 export default router;

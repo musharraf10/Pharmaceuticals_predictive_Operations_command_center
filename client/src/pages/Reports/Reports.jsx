@@ -22,6 +22,7 @@ import KPICard from "../../components/ui/KPICard";
 import Loader from "../../components/ui/Loader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { useReports } from "../../hooks/useReports";
+import { exportCsv } from "../../utils/exportCsv";
 import { formatDateTime } from "../../utils/formatDate";
 import { COMPLAINT_STATUS, INVENTORY_STATUS, TASK_STATUS } from "../../utils/statusConfig";
 
@@ -102,12 +103,30 @@ const Reports = () => {
     { title: "Tasks", value: overview.totalTasks, icon: ClipboardList, color: "secondary" },
   ];
 
+  const exportReports = () => {
+    const rows = [
+      ...Object.entries(overview || {}).map(([metric, value]) => ({ section: "Overview", metric, value })),
+      ...(inventory || []).map((item) => ({ section: "Inventory", metric: item.product?.name ?? item._id, value: `Qty: ${item.quantity} | Status: ${item.status}` })),
+      ...(orders || []).map((order) => ({ section: "Orders", metric: order.customerName, value: `Qty: ${order.quantity} | Status: ${order.status}` })),
+      ...(production || []).map((batch) => ({ section: "Production", metric: batch.batchNumber, value: `Qty: ${batch.quantity} | Status: ${batch.status}` })),
+      ...(forecasts || []).map((forecast) => ({ section: "Forecast", metric: forecast.product?.name ?? forecast._id, value: `Demand: ${forecast.predictedDemand} | Risk: ${forecast.riskLevel}` })),
+      ...(complaints || []).map((complaint) => ({ section: "Complaints", metric: complaint.title, value: `Severity: ${complaint.severity} | Status: ${complaint.status}` })),
+      ...(tasks || []).map((task) => ({ section: "Tasks", metric: task.title, value: `Priority: ${task.priority} | Status: ${task.status}` })),
+    ];
+
+    exportCsv("operations-full-report.csv", rows, [
+      { header: "Module / Section", key: "section" },
+      { header: "Item / Metric Name", key: "metric" },
+      { header: "Report Value / Status", key: "value" },
+    ]);
+  };
+
   return (
     <PageContainer>
       <PageHeader
         title="Reports"
         subtitle={`Operational reporting generated ${formatDateTime(summary.generatedAt)}`}
-        action={<Button variant="outline" icon={Download}>Export View</Button>}
+        action={<Button variant="outline" icon={Download} onClick={exportReports}>Export View</Button>}
       />
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">

@@ -32,6 +32,11 @@ export const updateTaskStatus = async (id, payload) => {
   return response.data;
 };
 
+export const updateTask = async (id, payload) => {
+  const response = await api.put(`${API_ENDPOINTS.TASKS}/${id}`, payload);
+  return response.data;
+};
+
 export const deleteTask = async (id) => {
   const response = await api.delete(`${API_ENDPOINTS.TASKS}/${id}`);
   return response.data;

@@ -40,6 +40,7 @@ import Loader from "../../components/ui/Loader";
 import NotificationCard from "../../components/ui/NotificationCard";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { useDashboard } from "../../hooks/useDashboard";
+import { exportCsv } from "../../utils/exportCsv";
 import { formatRelativeTime } from "../../utils/formatDate";
 import { ORDER_STATUS } from "../../utils/statusConfig";
 
@@ -84,6 +85,34 @@ const Dashboard = () => {
   }
 
   const { kpis, liveQueue, recentActivities, notifications } = dashboard;
+
+  const exportDashboard = () => {
+    const kpiRows = Object.entries(kpis || {}).map(([metric, value]) => ({
+      category: "KPI Metric",
+      item: metric,
+      details: String(value),
+    }));
+    const orderRows = (liveQueue || []).map((o) => ({
+      category: "Live Queue",
+      item: o.product?.name ?? "Product",
+      details: `Customer: ${o.customerName} | Qty: ${o.quantity} | Status: ${o.status}`,
+    }));
+    const activityRows = (recentActivities || []).map((a) => ({
+      category: "Recent Activity",
+      item: a.user?.name ?? "System",
+      details: `Action: ${a.action} | Entity: ${a.entity ?? "-"}`,
+    }));
+
+    exportCsv(
+      "dashboard-operations-report.csv",
+      [...kpiRows, ...orderRows, ...activityRows],
+      [
+        { header: "Category", key: "category" },
+        { header: "Item / Metric", key: "item" },
+        { header: "Details / Value", key: "details" },
+      ],
+    );
+  };
 
   const orderPipelineData = [
     { name: "Pending", value: kpis.pendingOrders },
@@ -162,7 +191,7 @@ const Dashboard = () => {
         action={
           <div className="flex items-center gap-2">
             <Badge color="success" dot>Live</Badge>
-            <Button variant="outline" icon={TrendingUp}>
+            <Button variant="outline" icon={TrendingUp} onClick={exportDashboard}>
               Export Report
             </Button>
           </div>
@@ -414,7 +443,7 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="divide-y divide-secondary-100">
+          <div className="h-[340px] overflow-y-auto custom-scrollbar divide-y divide-secondary-100">
             {liveQueue?.length > 0 ? (
               liveQueue.map((order) => (
                 <div
@@ -449,7 +478,7 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="divide-y divide-secondary-100">
+          <div className="h-[340px] overflow-y-auto custom-scrollbar divide-y divide-secondary-100">
             {recentActivities?.length > 0 ? (
               recentActivities.map((activity) => (
                 <div key={activity._id} className="flex gap-4 px-6 py-4">

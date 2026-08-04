@@ -95,6 +95,39 @@ export const updateTaskStatus = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, task, "Task status updated."));
 });
 
+export const updateTask = asyncHandler(async (req, res) => {
+  const task = await Task.findById(req.params.id);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const { title, description, priority, assignedTo, dueDate, status } = req.body;
+
+  if (title !== undefined) task.title = title;
+  if (description !== undefined) task.description = description;
+  if (priority !== undefined) task.priority = priority;
+  if (assignedTo !== undefined) task.assignedTo = assignedTo || null;
+  if (dueDate !== undefined) task.dueDate = dueDate || null;
+  if (status !== undefined) task.status = status;
+
+  await task.save();
+  await task.populate("assignedTo", "name role");
+  await task.populate("assignedBy", "name role");
+
+  await AuditLog.create({
+    user: req.user._id,
+    action: "TASK_UPDATED",
+    module: "TASK",
+    description: `Task "${task.title}" updated.`,
+    ipAddress: req.ip,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, task, "Task updated successfully."));
+});
+
 export const deleteTask = asyncHandler(async (req, res) => {
   const task = await Task.findById(req.params.id);
 

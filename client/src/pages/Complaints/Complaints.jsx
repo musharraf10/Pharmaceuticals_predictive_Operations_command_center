@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { AlertTriangle, CheckCircle2, MessageSquareWarning, MoreHorizontal, Plus, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Edit3, MessageSquareWarning, Plus, ShieldAlert, Trash2 } from "lucide-react";
 
 import PageContainer from "../../components/layout/PageContainer";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
 import DataTable, { TableCell, TableRow } from "../../components/ui/DataTable";
-import Dropdown, { DropdownDivider, DropdownItem } from "../../components/ui/Dropdown";
 import EmptyState from "../../components/ui/EmptyState";
 import Input from "../../components/ui/Input";
 import KPICard from "../../components/ui/KPICard";
@@ -26,7 +25,7 @@ const columns = [
   { header: "Severity", key: "severity", sortable: true, sortKey: "severity" },
   { header: "Status", key: "status", sortable: true, sortKey: "status" },
   { header: "Reported", key: "createdAt", sortable: true, sortKey: "createdAt" },
-  { header: "", key: "actions" },
+  { header: "Actions", key: "actions", className: "text-right" },
 ];
 
 const severityOptions = ["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((value) => ({
@@ -46,11 +45,9 @@ const Complaints = () => {
     isError,
     createComplaintAsync,
     updateComplaintAsync,
-    updateComplaintStatusAsync,
     deleteComplaintAsync,
     isCreating,
     isUpdating,
-    isUpdatingStatus,
   } = useComplaints();
   const { products } = useProducts();
   const [modal, setModal] = useState(null);
@@ -62,9 +59,8 @@ const Complaints = () => {
   );
 
   const complaintForm = useForm({
-    defaultValues: { title: "", description: "", product: "", reportedBy: "", severity: "LOW" },
+    defaultValues: { title: "", description: "", product: "", reportedBy: "", severity: "LOW", status: "OPEN", resolution: "" },
   });
-  const resolutionForm = useForm({ defaultValues: { status: "RESOLVED", resolution: "" } });
 
   if (isLoading) return <Loader fullScreen />;
 
@@ -85,35 +81,38 @@ const Complaints = () => {
     setModal(null);
     setSelectedComplaint(null);
     complaintForm.reset();
-    resolutionForm.reset();
   };
 
-  const createComplaint = async (values) => {
-    await createComplaintAsync(values);
-    closeModal();
+  const openCreate = () => {
+    setSelectedComplaint(null);
+    complaintForm.reset({ title: "", description: "", product: "", reportedBy: "", severity: "LOW", status: "OPEN", resolution: "" });
+    setModal("create");
   };
 
-  const openResolution = (complaint) => {
+  const openEdit = (complaint) => {
     setSelectedComplaint(complaint);
-    resolutionForm.reset({
-      status: complaint.status ?? "RESOLVED",
+    complaintForm.reset({
+      title: complaint.title ?? "",
+      description: complaint.description ?? "",
+      product: complaint.product?._id ?? complaint.product ?? "",
+      reportedBy: complaint.reportedBy ?? "",
+      severity: complaint.severity ?? "LOW",
+      status: complaint.status ?? "OPEN",
       resolution: complaint.resolution ?? "",
     });
-    setModal("resolution");
+    setModal("edit");
   };
 
-  const saveResolution = async (values) => {
-    await updateComplaintAsync({
-      id: selectedComplaint._id,
-      payload: {
-        status: values.status,
-        resolution: values.resolution,
-      },
-    });
-    if (values.status !== selectedComplaint.status) {
-      await updateComplaintStatusAsync({
-        id: selectedComplaint._id,
-        payload: { status: values.status },
+  const saveComplaint = async (values) => {
+    if (selectedComplaint) {
+      await updateComplaintAsync({ id: selectedComplaint._id, payload: values });
+    } else {
+      await createComplaintAsync({
+        title: values.title,
+        description: values.description,
+        product: values.product,
+        reportedBy: values.reportedBy,
+        severity: values.severity,
       });
     }
     closeModal();
@@ -124,7 +123,7 @@ const Complaints = () => {
       <PageHeader
         title="Complaints"
         subtitle="Quality signals, severity triage, and resolution tracking"
-        action={<Button icon={Plus} onClick={() => setModal("create")}>New Complaint</Button>}
+        action={<Button icon={Plus} onClick={openCreate}>New Complaint</Button>}
       />
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -145,7 +144,7 @@ const Complaints = () => {
           <TableRow key={complaint._id}>
             <TableCell>
               <div>
-                <p className="font-medium text-secondary-900">{complaint.title}</p>
+                <p className="font-semibold text-secondary-900">{complaint.title}</p>
                 {complaint.resolution && (
                   <p className="mt-1 max-w-sm truncate text-[13px] text-secondary-500">
                     Resolution: {complaint.resolution}
@@ -153,8 +152,8 @@ const Complaints = () => {
                 )}
               </div>
             </TableCell>
-            <TableCell>{complaint.product?.name ?? "Unavailable"}</TableCell>
-            <TableCell className="text-secondary-500">{complaint.reportedBy}</TableCell>
+            <TableCell><span className="font-medium text-secondary-800">{complaint.product?.name ?? "Unavailable"}</span></TableCell>
+            <TableCell className="text-secondary-600">{complaint.reportedBy}</TableCell>
             <TableCell>
               <StatusBadge statusMap={SEVERITY} status={complaint.severity} />
             </TableCell>
@@ -162,38 +161,31 @@ const Complaints = () => {
               <StatusBadge statusMap={COMPLAINT_STATUS} status={complaint.status} />
             </TableCell>
             <TableCell className="text-secondary-500">{formatDate(complaint.createdAt)}</TableCell>
-            <TableCell>
-              <Dropdown
-                trigger={
-                  <button className="rounded-lg p-1.5 text-secondary-400 hover:bg-secondary-100 hover:text-secondary-600">
-                    <MoreHorizontal size={18} />
-                  </button>
-                }
-              >
-                <DropdownItem onClick={() => openResolution(complaint)}>Update Resolution</DropdownItem>
-                <DropdownDivider />
-                <DropdownItem danger onClick={() => deleteComplaintAsync(complaint._id)}>
-                  Delete Complaint
-                </DropdownItem>
-              </Dropdown>
+            <TableCell className="text-right whitespace-nowrap">
+              <div className="inline-flex items-center justify-end gap-1.5">
+                <Button size="sm" variant="outline" icon={Edit3} onClick={() => openEdit(complaint)}>Edit</Button>
+                <Button size="sm" variant="ghost" icon={Trash2} onClick={() => deleteComplaintAsync(complaint._id)}>Delete</Button>
+              </div>
             </TableCell>
           </TableRow>
         )}
       />
 
       <Modal
-        open={modal === "create"}
-        title="Create Complaint"
+        open={modal === "create" || modal === "edit"}
+        title={selectedComplaint ? "Edit Complaint Details" : "Create New Complaint"}
         onClose={closeModal}
         size="lg"
         footer={
           <>
             <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button type="submit" form="complaint-form" loading={isCreating}>Submit Complaint</Button>
+            <Button type="submit" form="complaint-form" loading={isCreating || isUpdating}>
+              {selectedComplaint ? "Save Changes" : "Submit Complaint"}
+            </Button>
           </>
         }
       >
-        <form id="complaint-form" onSubmit={complaintForm.handleSubmit(createComplaint)} className="space-y-4">
+        <form id="complaint-form" onSubmit={complaintForm.handleSubmit(saveComplaint)} className="space-y-4">
           <Input
             label="Complaint Title"
             error={complaintForm.formState.errors.title?.message}
@@ -201,23 +193,30 @@ const Complaints = () => {
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <Select
-              label="Product"
+              label="Affected Product"
               placeholder="Choose product"
               options={productOptions}
               error={complaintForm.formState.errors.product?.message}
               {...complaintForm.register("product", { required: "Product is required" })}
             />
-            <Select label="Severity" options={severityOptions} {...complaintForm.register("severity")} />
+            <Select label="Severity Level" options={severityOptions} {...complaintForm.register("severity")} />
           </div>
           <Input
-            label="Reported By"
+            label="Reported By (Person / Facility)"
             error={complaintForm.formState.errors.reportedBy?.message}
             {...complaintForm.register("reportedBy", { required: "Reporter is required" })}
           />
+          {selectedComplaint && (
+            <div className="grid gap-4 sm:grid-cols-2 rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+              <Select label="Resolution Status" options={statusOptions} {...complaintForm.register("status")} />
+              <Input label="Resolution / Corrective Action Notes" placeholder="Detail action taken..." {...complaintForm.register("resolution")} />
+            </div>
+          )}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Description</label>
+            <label className="text-sm font-medium text-secondary-700">Detailed Complaint Description</label>
             <textarea
               rows={4}
+              placeholder="Provide context, batch details, or quality observation..."
               className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               {...complaintForm.register("description", { required: "Description is required" })}
             />
@@ -228,29 +227,6 @@ const Complaints = () => {
         </form>
       </Modal>
 
-      <Modal
-        open={modal === "resolution"}
-        title={`Resolve ${selectedComplaint?.title ?? "Complaint"}`}
-        onClose={closeModal}
-        footer={
-          <>
-            <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button type="submit" form="resolution-form" loading={isUpdating || isUpdatingStatus}>Save</Button>
-          </>
-        }
-      >
-        <form id="resolution-form" onSubmit={resolutionForm.handleSubmit(saveResolution)} className="space-y-4">
-          <Select label="Status" options={statusOptions} {...resolutionForm.register("status")} />
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-secondary-700">Resolution</label>
-            <textarea
-              rows={4}
-              className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
-              {...resolutionForm.register("resolution")}
-            />
-          </div>
-        </form>
-      </Modal>
     </PageContainer>
   );
 };

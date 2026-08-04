@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { CheckCircle2, ClipboardCheck, FileCheck2, MoreHorizontal, Plus, RotateCcw, XCircle } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, FileCheck2, Plus, RotateCcw, Trash2, XCircle } from "lucide-react";
 
 import PageContainer from "../../components/layout/PageContainer";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
 import Card, { CardHeader } from "../../components/ui/Card";
 import DataTable, { TableCell, TableRow } from "../../components/ui/DataTable";
-import Dropdown, { DropdownDivider, DropdownItem } from "../../components/ui/Dropdown";
 import EmptyState from "../../components/ui/EmptyState";
 import KPICard from "../../components/ui/KPICard";
 import Loader from "../../components/ui/Loader";
@@ -25,7 +24,7 @@ const columns = [
   { header: "Reviewer", key: "reviewer", sortable: true, sortKey: "reviewer.name" },
   { header: "Reason", key: "reason" },
   { header: "Reviewed", key: "approvedAt", sortable: true, sortKey: "approvedAt" },
-  { header: "", key: "actions" },
+  { header: "Actions", key: "actions", className: "text-right" },
 ];
 
 const decisionOptions = ["APPROVED", "REJECTED", "OVERRIDDEN"].map((value) => ({
@@ -91,6 +90,14 @@ const Approvals = () => {
     closeModal();
   };
 
+  const decideForecast = async (forecast, decision) => {
+    await createApprovalAsync({
+      forecast: forecast._id,
+      decision,
+      reason: `${APPROVAL_STATUS[decision].label} from forecast review queue.`,
+    });
+  };
+
   return (
     <PageContainer>
       <PageHeader
@@ -128,6 +135,11 @@ const Approvals = () => {
                   <p className="mt-3 line-clamp-2 text-[13px] text-secondary-500">
                     {forecast.recommendation || forecast.explanation || "Review forecast confidence and operational risk before approval."}
                   </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button size="sm" variant="success" icon={CheckCircle2} loading={isCreating} onClick={() => decideForecast(forecast, "APPROVED")}>Approve</Button>
+                    <Button size="sm" variant="outline" icon={XCircle} loading={isCreating} onClick={() => decideForecast(forecast, "REJECTED")}>Reject</Button>
+                    <Button size="sm" variant="secondary" icon={RotateCcw} loading={isCreating} onClick={() => decideForecast(forecast, "OVERRIDDEN")}>Override</Button>
+                  </div>
                 </div>
               ))}
           </div>
@@ -168,20 +180,10 @@ const Approvals = () => {
               {approval.reason || "No reason provided"}
             </TableCell>
             <TableCell className="text-secondary-500">{formatDate(approval.approvedAt)}</TableCell>
-            <TableCell>
-              <Dropdown
-                trigger={
-                  <button className="rounded-lg p-1.5 text-secondary-400 hover:bg-secondary-100 hover:text-secondary-600">
-                    <MoreHorizontal size={18} />
-                  </button>
-                }
-              >
-                <DropdownItem>View Decision</DropdownItem>
-                <DropdownDivider />
-                <DropdownItem danger onClick={() => deleteApprovalAsync(approval._id)}>
-                  Delete Decision
-                </DropdownItem>
-              </Dropdown>
+            <TableCell className="text-right whitespace-nowrap">
+              <Button size="sm" variant="ghost" icon={Trash2} onClick={() => deleteApprovalAsync(approval._id)}>
+                Delete
+              </Button>
             </TableCell>
           </TableRow>
         )}

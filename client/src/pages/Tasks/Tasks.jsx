@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { CalendarClock, CheckCircle2, ClipboardList, MoreHorizontal, Plus, UserPlus } from "lucide-react";
+import { CalendarClock, CheckCircle2, ClipboardList, Edit3, Plus, Trash2 } from "lucide-react";
 
 import PageContainer from "../../components/layout/PageContainer";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
 import DataTable, { TableCell, TableRow } from "../../components/ui/DataTable";
-import Dropdown, { DropdownDivider, DropdownItem } from "../../components/ui/Dropdown";
 import EmptyState from "../../components/ui/EmptyState";
 import Input from "../../components/ui/Input";
 import KPICard from "../../components/ui/KPICard";
@@ -25,7 +24,7 @@ const columns = [
   { header: "Priority", key: "priority", sortable: true, sortKey: "priority" },
   { header: "Due Date", key: "dueDate", sortable: true, sortKey: "dueDate" },
   { header: "Status", key: "status", sortable: true, sortKey: "status" },
-  { header: "", key: "actions" },
+  { header: "Actions", key: "actions", className: "text-right" },
 ];
 
 const priorityOptions = ["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((value) => ({
@@ -44,12 +43,10 @@ const Tasks = () => {
     isLoading,
     isError,
     createTaskAsync,
-    assignTaskAsync,
-    updateTaskStatusAsync,
+    updateTaskAsync,
     deleteTaskAsync,
     isCreating,
-    isAssigning,
-    isUpdatingStatus,
+    isUpdating,
   } = useTasks();
   const { users } = useUsers();
   const [modal, setModal] = useState(null);
@@ -63,8 +60,9 @@ const Tasks = () => {
   const taskForm = useForm({
     defaultValues: { title: "", description: "", priority: "MEDIUM", assignedTo: "", dueDate: "" },
   });
-  const assignForm = useForm({ defaultValues: { assignedTo: "" } });
-  const statusForm = useForm({ defaultValues: { status: "PENDING" } });
+  const editForm = useForm({
+    defaultValues: { title: "", description: "", priority: "MEDIUM", assignedTo: "", dueDate: "", status: "PENDING" },
+  });
 
   if (isLoading) return <Loader fullScreen />;
 
@@ -81,22 +79,24 @@ const Tasks = () => {
   const completed = tasks.filter((task) => task.status === "COMPLETED").length;
   const critical = tasks.filter((task) => task.priority === "CRITICAL").length;
 
-  const openAssign = (task) => {
+  const openEdit = (task) => {
     setSelectedTask(task);
-    assignForm.reset({ assignedTo: task.assignedTo?._id ?? "" });
-    setModal("assign");
-  };
-
-  const openStatus = (task) => {
-    setSelectedTask(task);
-    statusForm.reset({ status: task.status ?? "PENDING" });
-    setModal("status");
+    editForm.reset({
+      title: task.title ?? "",
+      description: task.description ?? "",
+      assignedTo: task.assignedTo?._id ?? task.assignedTo ?? "",
+      priority: task.priority ?? "MEDIUM",
+      dueDate: task.dueDate ? task.dueDate.slice(0, 10) : "",
+      status: task.status ?? "PENDING",
+    });
+    setModal("edit");
   };
 
   const closeModal = () => {
     setModal(null);
     setSelectedTask(null);
     taskForm.reset();
+    editForm.reset();
   };
 
   const createTask = async (values) => {
@@ -109,13 +109,13 @@ const Tasks = () => {
     closeModal();
   };
 
-  const assignTask = async (values) => {
-    await assignTaskAsync({ id: selectedTask._id, payload: values });
-    closeModal();
-  };
-
-  const updateStatus = async (values) => {
-    await updateTaskStatusAsync({ id: selectedTask._id, payload: values });
+  const saveEditTask = async (values) => {
+    const payload = {
+      ...values,
+      assignedTo: values.assignedTo || undefined,
+      dueDate: values.dueDate || undefined,
+    };
+    await updateTaskAsync({ id: selectedTask._id, payload });
     closeModal();
   };
 
@@ -145,7 +145,7 @@ const Tasks = () => {
           <TableRow key={task._id}>
             <TableCell>
               <div>
-                <p className="font-medium text-secondary-900">{task.title}</p>
+                <p className="font-semibold text-secondary-900">{task.title}</p>
                 {task.description && (
                   <p className="mt-1 max-w-md truncate text-[13px] text-secondary-500">
                     {task.description}
@@ -153,7 +153,7 @@ const Tasks = () => {
                 )}
               </div>
             </TableCell>
-            <TableCell className="text-secondary-500">
+            <TableCell className="text-secondary-600 font-medium">
               {task.assignedTo?.name ?? "Unassigned"}
             </TableCell>
             <TableCell>
@@ -163,23 +163,11 @@ const Tasks = () => {
             <TableCell>
               <StatusBadge statusMap={TASK_STATUS} status={task.status} />
             </TableCell>
-            <TableCell>
-              <Dropdown
-                trigger={
-                  <button className="rounded-lg p-1.5 text-secondary-400 hover:bg-secondary-100 hover:text-secondary-600">
-                    <MoreHorizontal size={18} />
-                  </button>
-                }
-              >
-                <DropdownItem icon={UserPlus} onClick={() => openAssign(task)}>
-                  Assign Owner
-                </DropdownItem>
-                <DropdownItem onClick={() => openStatus(task)}>Update Status</DropdownItem>
-                <DropdownDivider />
-                <DropdownItem danger onClick={() => deleteTaskAsync(task._id)}>
-                  Delete Task
-                </DropdownItem>
-              </Dropdown>
+            <TableCell className="text-right whitespace-nowrap">
+              <div className="inline-flex items-center justify-end gap-1.5">
+                <Button size="sm" variant="outline" icon={Edit3} onClick={() => openEdit(task)}>Edit</Button>
+                <Button size="sm" variant="ghost" icon={Trash2} onClick={() => deleteTaskAsync(task._id)}>Delete</Button>
+              </div>
             </TableCell>
           </TableRow>
         )}
@@ -189,6 +177,7 @@ const Tasks = () => {
         open={modal === "create"}
         title="Create Task"
         onClose={closeModal}
+        size="lg"
         footer={
           <>
             <Button variant="outline" onClick={closeModal}>Cancel</Button>
@@ -211,48 +200,52 @@ const Tasks = () => {
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Select label="Priority" options={priorityOptions} {...taskForm.register("priority")} />
+            <Select label="Priority Level" options={priorityOptions} {...taskForm.register("priority")} />
             <Input label="Due Date" type="date" {...taskForm.register("dueDate")} />
           </div>
-          <Select label="Assign To" placeholder="Choose owner" options={userOptions} {...taskForm.register("assignedTo")} />
+          <Select label="Assign User" placeholder="Choose owner" options={userOptions} {...taskForm.register("assignedTo")} />
         </form>
       </Modal>
 
       <Modal
-        open={modal === "assign"}
-        title={`Assign ${selectedTask?.title ?? "Task"}`}
+        open={modal === "edit"}
+        title="Edit Task Details"
         onClose={closeModal}
+        size="lg"
         footer={
           <>
             <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button type="submit" form="assign-form" loading={isAssigning}>Assign</Button>
+            <Button type="submit" form="edit-task-form" loading={isUpdating}>Save Changes</Button>
           </>
         }
       >
-        <form id="assign-form" onSubmit={assignForm.handleSubmit(assignTask)}>
-          <Select
-            label="Owner"
-            placeholder="Choose owner"
-            options={userOptions}
-            error={assignForm.formState.errors.assignedTo?.message}
-            {...assignForm.register("assignedTo", { required: "Owner is required" })}
+        <form id="edit-task-form" onSubmit={editForm.handleSubmit(saveEditTask)} className="space-y-4">
+          <Input
+            label="Task Title"
+            error={editForm.formState.errors.title?.message}
+            {...editForm.register("title", { required: "Title is required" })}
           />
-        </form>
-      </Modal>
-
-      <Modal
-        open={modal === "status"}
-        title={`Update ${selectedTask?.title ?? "Task"}`}
-        onClose={closeModal}
-        footer={
-          <>
-            <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button type="submit" form="status-form" loading={isUpdatingStatus}>Update</Button>
-          </>
-        }
-      >
-        <form id="status-form" onSubmit={statusForm.handleSubmit(updateStatus)}>
-          <Select label="Status" options={statusOptions} {...statusForm.register("status")} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Select
+              label="Assign User"
+              placeholder="Choose user"
+              options={userOptions}
+              {...editForm.register("assignedTo")}
+            />
+            <Select label="Status" options={statusOptions} {...editForm.register("status")} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Select label="Priority" options={priorityOptions} {...editForm.register("priority")} />
+            <Input label="Due Date" type="date" {...editForm.register("dueDate")} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-secondary-700">Description</label>
+            <textarea
+              rows={3}
+              className="w-full rounded-xl border border-secondary-300 px-4 py-2.5 text-[15px] focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              {...editForm.register("description")}
+            />
+          </div>
         </form>
       </Modal>
     </PageContainer>
