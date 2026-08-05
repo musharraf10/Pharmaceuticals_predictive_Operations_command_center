@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
@@ -9,13 +10,12 @@ import {
   Factory,
   Package,
   ShoppingCart,
+  Sliders,
   Sparkles,
   TrendingUp,
   Truck,
 } from "lucide-react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -45,6 +45,12 @@ import { exportCsv } from "../../utils/exportCsv";
 import { formatRelativeTime } from "../../utils/formatDate";
 import { ORDER_STATUS } from "../../utils/statusConfig";
 
+import DemandForecastChart from "../../components/dashboard/DemandForecastChart";
+import WorkloadForecastChart from "../../components/dashboard/WorkloadForecastChart";
+import ProductionHeatMap from "../../components/dashboard/ProductionHeatMap";
+import RiskDrillDownModal from "../../components/dashboard/RiskDrillDownModal";
+import AlertThresholdsModal from "../../components/dashboard/AlertThresholdsModal";
+
 const CHART_COLORS = ["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#06B6D4"];
 
 const ChartTooltip = ({ active, payload, label }) => {
@@ -65,6 +71,17 @@ const ChartTooltip = ({ active, payload, label }) => {
 const Dashboard = () => {
   const { dashboard, isLoading, isError } = useDashboard();
   const { theme } = useLayout();
+
+  const [thresholds, setThresholds] = useState({
+    lowStockLimit: 50,
+    highDemandMultiplier: 1.5,
+    maxLineCapacity: 6,
+    maxComplaintThreshold: 3,
+  });
+
+  const [thresholdsModalOpen, setThresholdsModalOpen] = useState(false);
+  const [riskModalOpen, setRiskModalOpen] = useState(false);
+  const [selectedRiskCategory, setSelectedRiskCategory] = useState("ALL");
 
   const isDark = theme === "dark";
   const gridColor = isDark ? "#334155" : "#E2E8F0";
@@ -90,7 +107,21 @@ const Dashboard = () => {
     );
   }
 
-  const { kpis, liveQueue, recentActivities, notifications } = dashboard;
+  const {
+    kpis,
+    liveQueue,
+    recentActivities,
+    notifications,
+    demandForecastData = [],
+    workloadForecastData = [],
+    productionCapacityData = [],
+    riskItems = [],
+  } = dashboard;
+
+  const handleOpenRiskModal = (category = "ALL") => {
+    setSelectedRiskCategory(category);
+    setRiskModalOpen(true);
+  };
 
   const exportDashboard = () => {
     const kpiRows = Object.entries(kpis || {}).map(([metric, value]) => ({
@@ -139,22 +170,6 @@ const Dashboard = () => {
     { name: "Out of Stock", value: kpis.outOfStock },
   ];
 
-  const productionData = [
-    { name: "Planned", batches: kpis.plannedBatches },
-    { name: "In Progress", batches: kpis.batchesInProgress },
-    { name: "Completed", batches: kpis.completedBatches },
-    { name: "Rejected", batches: kpis.rejectedBatches },
-  ];
-
-  const forecastTrend = [
-    { month: "Jan", demand: 4200, forecast: 4100 },
-    { month: "Feb", demand: 3800, forecast: 3950 },
-    { month: "Mar", demand: 5100, forecast: 5050 },
-    { month: "Apr", demand: 4600, forecast: 4700 },
-    { month: "May", demand: 5400, forecast: 5300 },
-    { month: "Jun", demand: kpis.totalForecasts * 120 || 5800, forecast: 5900 },
-  ];
-
   const aiRecommendations = [
     kpis.lowStock > 0 && {
       title: "Restock low inventory items",
@@ -183,10 +198,10 @@ const Dashboard = () => {
   ].filter(Boolean);
 
   const quickActions = [
-    { label: "New Order", icon: ShoppingCart, path: "/orders", color: "primary" },
-    { label: "Run Forecast", icon: BrainCircuit, path: "/forecast", color: "info" },
-    { label: "View Inventory", icon: Boxes, path: "/inventory", color: "success" },
-    { label: "Production", icon: Factory, path: "/production", color: "warning" },
+    { label: "New Order", icon: ShoppingCart, path: "/orders" },
+    { label: "Run Forecast", icon: BrainCircuit, path: "/forecast" },
+    { label: "View Inventory", icon: Boxes, path: "/inventory" },
+    { label: "Production", icon: Factory, path: "/production" },
   ];
 
   return (
@@ -195,8 +210,14 @@ const Dashboard = () => {
         title="Operations Command Center"
         subtitle="Real-time supply chain intelligence and predictive insights"
         action={
-          <div className="flex items-center gap-2">
-            <Badge color="success" dot>Live</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              icon={Sliders}
+              onClick={() => setThresholdsModalOpen(true)}
+            >
+              Alert Thresholds
+            </Button>
             <Button variant="outline" icon={TrendingUp} onClick={exportDashboard}>
               Export Report
             </Button>
@@ -204,7 +225,7 @@ const Dashboard = () => {
         }
       />
 
-      {/* KPI Grid */}
+      {/* KPI Grid with Clickable Risk Drill-Down Handlers */}
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <KPICard
           title="Total Products"
@@ -213,13 +234,15 @@ const Dashboard = () => {
           icon={Package}
           color="primary"
         />
-        <KPICard
-          title="Inventory Items"
-          value={kpis.totalInventoryItems}
-          subtitle={`${kpis.lowStock} low · ${kpis.outOfStock} out`}
-          icon={Boxes}
-          color="success"
-        />
+        <div onClick={() => handleOpenRiskModal("INVENTORY")} className="h-full flex flex-col cursor-pointer">
+          <KPICard
+            title="Inventory Items"
+            value={kpis.totalInventoryItems}
+            subtitle={`${kpis.lowStock} low · ${kpis.outOfStock} out (Click to drill down)`}
+            icon={Boxes}
+            color={kpis.lowStock > 0 || kpis.outOfStock > 0 ? "danger" : "success"}
+          />
+        </div>
         <KPICard
           title="Active Orders"
           value={kpis.totalOrders}
@@ -227,36 +250,43 @@ const Dashboard = () => {
           icon={ShoppingCart}
           color="warning"
         />
-        <KPICard
-          title="AI Forecasts"
-          value={kpis.totalForecasts}
-          subtitle="Predictive models active"
-          icon={BrainCircuit}
-          color="info"
-        />
+        <div onClick={() => handleOpenRiskModal("FORECAST")} className="h-full flex flex-col cursor-pointer">
+          <KPICard
+            title="AI Forecasts"
+            value={kpis.totalForecasts}
+            subtitle={`${kpis.anomaliesCount || 0} anomaly alerts (Click to drill down)`}
+            icon={BrainCircuit}
+            color={kpis.anomaliesCount > 0 ? "warning" : "info"}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <KPICard
           title="Suppliers"
           value={kpis.totalSuppliers}
+          subtitle="Active procurement partners"
           icon={Truck}
-          color="secondary"
-        />
-        <KPICard
-          title="Production Batches"
-          value={kpis.batchesInProgress}
-          subtitle={`${kpis.completedBatches} completed`}
-          icon={Factory}
           color="primary"
         />
-        <KPICard
-          title="Open Complaints"
-          value={kpis.openComplaints}
-          subtitle={`${kpis.totalComplaints} total reported`}
-          icon={AlertTriangle}
-          color="danger"
-        />
+        <div onClick={() => handleOpenRiskModal("CAPACITY")} className="h-full flex flex-col cursor-pointer">
+          <KPICard
+            title="Production Batches"
+            value={kpis.batchesInProgress}
+            subtitle={`${kpis.completedBatches} completed · ${kpis.overloadedLinesCount || 0} strain alerts`}
+            icon={Factory}
+            color={kpis.overloadedLinesCount > 0 ? "danger" : "primary"}
+          />
+        </div>
+        <div onClick={() => handleOpenRiskModal("COMPLAINT")} className="h-full flex flex-col cursor-pointer">
+          <KPICard
+            title="Open Complaints"
+            value={kpis.openComplaints}
+            subtitle={`${kpis.totalComplaints} total reported (Click to drill down)`}
+            icon={AlertTriangle}
+            color={kpis.openComplaints > 0 ? "danger" : "success"}
+          />
+        </div>
         <KPICard
           title="Pending Tasks"
           value={kpis.highPriorityTasks}
@@ -266,13 +296,32 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Charts Row */}
+      {/* Predictive Analytics Section 1: Demand Forecast & Workload */}
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <ChartCard
-          title="Order Pipeline"
-          subtitle="Fulfillment status breakdown"
-          className="xl:col-span-1"
-        >
+        <div className="xl:col-span-2">
+          <DemandForecastChart
+            data={demandForecastData}
+            thresholds={thresholds}
+            onSelectNode={() => handleOpenRiskModal("FORECAST")}
+          />
+        </div>
+        <div className="xl:col-span-1">
+          <WorkloadForecastChart
+            data={workloadForecastData}
+            onSelectNode={() => handleOpenRiskModal("CAPACITY")}
+          />
+        </div>
+      </div>
+
+      {/* Production Capacity Heat Map */}
+      <ProductionHeatMap
+        data={productionCapacityData}
+        onSelectLine={() => handleOpenRiskModal("CAPACITY")}
+      />
+
+      {/* Operations Pipeline & Inventory Health */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ChartCard title="Order Pipeline" subtitle="Fulfillment status breakdown">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={orderPipelineData} barSize={32}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
@@ -308,61 +357,6 @@ const Dashboard = () => {
             </PieChart>
           </ResponsiveContainer>
         </ChartCard>
-
-        <ChartCard
-          title="Demand Forecast Trend"
-          subtitle="Actual vs predicted demand"
-          className="lg:col-span-2 xl:col-span-1"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={forecastTrend}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
-              <Tooltip content={<ChartTooltip />} />
-              <Area type="monotone" dataKey="demand" name="Actual" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.15} strokeWidth={2} />
-              <Area type="monotone" dataKey="forecast" name="Forecast" stroke="#22C55E" fill="#22C55E" fillOpacity={0.15} strokeWidth={2} strokeDasharray="5 5" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
-      </div>
-
-      {/* Production + Quick Actions + AI */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <ChartCard title="Production Overview" subtitle="Batch status by stage" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={productionData} layout="vertical" barSize={20}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} width={90} />
-              <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="batches" name="Batches" fill="#3B82F6" radius={[0, 6, 6, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <Card>
-          <CardHeader title="Quick Actions" subtitle="Common workflows" />
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link
-                  key={action.label}
-                  to={action.path}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-secondary-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 text-center transition-all duration-200 hover:scale-[1.02] hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-slate-800/80 hover:shadow-card"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400">
-                    <Icon size={20} />
-                  </div>
-                  <span className="text-[13px] font-medium text-secondary-700 dark:text-slate-200">
-                    {action.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </Card>
       </div>
 
       {/* AI Recommendations + Notifications */}
@@ -510,6 +504,22 @@ const Dashboard = () => {
           </div>
         </Card>
       </div>
+
+      {/* Risk Drill-Down Modal */}
+      <RiskDrillDownModal
+        open={riskModalOpen}
+        onClose={() => setRiskModalOpen(false)}
+        items={riskItems}
+        selectedCategory={selectedRiskCategory}
+      />
+
+      {/* Configurable Alert Thresholds Modal */}
+      <AlertThresholdsModal
+        open={thresholdsModalOpen}
+        onClose={() => setThresholdsModalOpen(false)}
+        currentThresholds={thresholds}
+        onSaveThresholds={(newThresholds) => setThresholds(newThresholds)}
+      />
     </PageContainer>
   );
 };

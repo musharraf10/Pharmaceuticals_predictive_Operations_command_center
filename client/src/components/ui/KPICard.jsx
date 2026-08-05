@@ -20,6 +20,7 @@ const KPICard = ({
     warning: "bg-warning-50 text-warning-600 dark:bg-warning-900/30 dark:text-warning-400",
     danger: "bg-danger-50 text-danger-600 dark:bg-danger-900/30 dark:text-danger-400",
     info: "bg-info-50 text-info-600 dark:bg-info-900/30 dark:text-info-400",
+    secondary: "bg-secondary-100 text-secondary-600 dark:bg-slate-800 dark:text-slate-300",
   };
 
   const isPositive = trend > 0;
@@ -28,7 +29,7 @@ const KPICard = ({
   return (
     <Card
       hover
-      className={cn("transition-all duration-200", className)}
+      className={cn("h-full transition-all duration-200 flex flex-col justify-between", className)}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
