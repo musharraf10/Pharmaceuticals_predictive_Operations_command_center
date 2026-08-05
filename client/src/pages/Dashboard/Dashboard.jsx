@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
@@ -51,6 +51,13 @@ import ProductionHeatMap from "../../components/dashboard/ProductionHeatMap";
 import RiskDrillDownModal from "../../components/dashboard/RiskDrillDownModal";
 import AlertThresholdsModal from "../../components/dashboard/AlertThresholdsModal";
 
+const DEFAULT_THRESHOLDS = {
+  lowStockLimit: 50,
+  highDemandMultiplier: 1.5,
+  maxLineCapacity: 6,
+  maxComplaintThreshold: 3,
+};
+
 const CHART_COLORS = ["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#06B6D4"];
 
 const ChartTooltip = ({ active, payload, label }) => {
@@ -72,12 +79,23 @@ const Dashboard = () => {
   const { dashboard, isLoading, isError } = useDashboard();
   const { theme } = useLayout();
 
-  const [thresholds, setThresholds] = useState({
-    lowStockLimit: 50,
-    highDemandMultiplier: 1.5,
-    maxLineCapacity: 6,
-    maxComplaintThreshold: 3,
+  const [thresholds, setThresholds] = useState(() => {
+    try {
+      const saved = localStorage.getItem("pharma_alert_thresholds");
+      return saved ? JSON.parse(saved) : DEFAULT_THRESHOLDS;
+    } catch {
+      return DEFAULT_THRESHOLDS;
+    }
   });
+
+  const handleSaveThresholds = (newThresholds) => {
+    setThresholds(newThresholds);
+    try {
+      localStorage.setItem("pharma_alert_thresholds", JSON.stringify(newThresholds));
+    } catch (e) {
+      console.error("Failed to save thresholds", e);
+    }
+  };
 
   const [thresholdsModalOpen, setThresholdsModalOpen] = useState(false);
   const [riskModalOpen, setRiskModalOpen] = useState(false);
@@ -86,6 +104,80 @@ const Dashboard = () => {
   const isDark = theme === "dark";
   const gridColor = isDark ? "#334155" : "#E2E8F0";
   const tickColor = isDark ? "#CBD5E1" : "#64748B";
+
+  const demandForecastData = dashboard?.demandForecastData ?? [];
+  const workloadForecastData = dashboard?.workloadForecastData ?? [];
+  const productionCapacityData = dashboard?.productionCapacityData ?? [];
+  const riskItems = dashboard?.riskItems ?? [];
+  const kpis = dashboard?.kpis ?? {};
+  const liveQueue = dashboard?.liveQueue ?? [];
+  const recentActivities = dashboard?.recentActivities ?? [];
+  const notifications = dashboard?.notifications ?? [];
+
+  // Real Data Analytics recalculated dynamically based on active Thresholds
+  const activeDemandForecastData = useMemo(() => {
+    return demandForecastData.map((item) => {
+      const mult = thresholds.highDemandMultiplier || 1.5;
+      const lowLimit = thresholds.lowStockLimit || 50;
+      const isAnomaly =
+        item.predictedDemand > item.currentStock * mult ||
+        (item.currentStock < lowLimit && item.predictedDemand > 0) ||
+        item.confidence < 75;
+
+      return {
+        ...item,
+        isAnomaly,
+        anomalyReason: isAnomaly
+          ? item.predictedDemand > item.currentStock * mult
+            ? `Demand exceeds stock by >${Math.round((mult - 1) * 100)}%`
+            : item.currentStock < lowLimit
+            ? `Stock (${item.currentStock}) below threshold (${lowLimit})`
+            : "Low prediction confidence"
+          : null,
+      };
+    });
+  }, [demandForecastData, thresholds]);
+
+  const activeProductionCapacityData = useMemo(() => {
+    return productionCapacityData.map((item) => {
+      const maxCap = thresholds.maxLineCapacity || 6;
+      const utilizationPercent = Math.min(Math.round((item.activeBatches / maxCap) * 100), 100);
+
+      let capacityStatus = "OPTIMAL";
+      if (utilizationPercent < 30) capacityStatus = "LOW";
+      else if (utilizationPercent >= 85 || item.activeBatches >= maxCap) capacityStatus = "OVERLOADED";
+      else if (utilizationPercent >= 60) capacityStatus = "HIGH";
+
+      return {
+        ...item,
+        maxCapacity: maxCap,
+        utilizationPercent,
+        capacityStatus,
+      };
+    });
+  }, [productionCapacityData, thresholds]);
+
+  const activeRiskItems = useMemo(() => {
+    const items = [...riskItems];
+    if (kpis.openComplaints >= thresholds.maxComplaintThreshold) {
+      items.push({
+        id: "cmp-thresh-alert",
+        category: "COMPLAINT",
+        title: "Quality Complaint Threshold Exceeded",
+        severity: "HIGH",
+        currentValue: `${kpis.openComplaints} open complaints`,
+        thresholdValue: `${thresholds.maxComplaintThreshold} max threshold`,
+        description: `Total open complaints (${kpis.openComplaints}) equal or exceed configured limit (${thresholds.maxComplaintThreshold}).`,
+        actionPath: "/complaints",
+      });
+    }
+    return items;
+  }, [riskItems, kpis.openComplaints, thresholds]);
+
+  const handleOpenRiskModal = (category = "ALL") => {
+    setSelectedRiskCategory(category);
+    setRiskModalOpen(true);
+  };
 
   if (isLoading) return <Loader fullScreen />;
 
@@ -106,22 +198,6 @@ const Dashboard = () => {
       />
     );
   }
-
-  const {
-    kpis,
-    liveQueue,
-    recentActivities,
-    notifications,
-    demandForecastData = [],
-    workloadForecastData = [],
-    productionCapacityData = [],
-    riskItems = [],
-  } = dashboard;
-
-  const handleOpenRiskModal = (category = "ALL") => {
-    setSelectedRiskCategory(category);
-    setRiskModalOpen(true);
-  };
 
   const exportDashboard = () => {
     const kpiRows = Object.entries(kpis || {}).map(([metric, value]) => ({
@@ -300,7 +376,7 @@ const Dashboard = () => {
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <DemandForecastChart
-            data={demandForecastData}
+            data={activeDemandForecastData}
             thresholds={thresholds}
             onSelectNode={() => handleOpenRiskModal("FORECAST")}
           />
@@ -315,7 +391,7 @@ const Dashboard = () => {
 
       {/* Production Capacity Heat Map */}
       <ProductionHeatMap
-        data={productionCapacityData}
+        data={activeProductionCapacityData}
         onSelectLine={() => handleOpenRiskModal("CAPACITY")}
       />
 
@@ -509,7 +585,7 @@ const Dashboard = () => {
       <RiskDrillDownModal
         open={riskModalOpen}
         onClose={() => setRiskModalOpen(false)}
-        items={riskItems}
+        items={activeRiskItems}
         selectedCategory={selectedRiskCategory}
       />
 
@@ -518,7 +594,7 @@ const Dashboard = () => {
         open={thresholdsModalOpen}
         onClose={() => setThresholdsModalOpen(false)}
         currentThresholds={thresholds}
-        onSaveThresholds={(newThresholds) => setThresholds(newThresholds)}
+        onSaveThresholds={handleSaveThresholds}
       />
     </PageContainer>
   );

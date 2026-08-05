@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RotateCcw, Save, Sliders } from "lucide-react";
 
 import Modal from "../ui/Modal";
@@ -7,6 +7,12 @@ import Button from "../ui/Button";
 
 const AlertThresholdsModal = ({ open, onClose, currentThresholds, onSaveThresholds }) => {
   const [thresholds, setThresholds] = useState(currentThresholds);
+
+  useEffect(() => {
+    if (open && currentThresholds) {
+      setThresholds(currentThresholds);
+    }
+  }, [open, currentThresholds]);
 
   const handleChange = (field, value) => {
     setThresholds((prev) => ({
