@@ -9,17 +9,37 @@ import {
     Dna,
     Eye,
     EyeOff,
+    Info,
     Lock,
     Mail,
     Moon,
     ShieldCheck,
     Sparkles,
     Sun,
+    UserCheck,
 } from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
 import { useLayout } from "../../hooks/useLayout";
 import getErrorMessage from "../../utils/getErrorMessage";
+
+const DEMO_ACCOUNTS = [
+    {
+        role: "Admin",
+        email: "admin@pharma.com",
+        password: "Admin@123",
+    },
+    {
+        role: "Operator",
+        email: "moheet@gmail.com",
+        password: "9182399196",
+    },
+    {
+        role: "Analyst",
+        email: "muqeet@gmail.com",
+        password: "9182399196",
+    },
+];
 
 const Login = () => {
     const navigate = useNavigate();
@@ -27,6 +47,7 @@ const Login = () => {
     const { theme, toggleTheme } = useLayout();
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [selectedRole, setSelectedRole] = useState(DEMO_ACCOUNTS[0]);
 
     const {
         register,
@@ -53,10 +74,11 @@ const Login = () => {
         }
     };
 
-    const fillDemoCredentials = () => {
-        setValue("email", "admin@pharma.com", { shouldValidate: true });
-        setValue("password", "Admin@123", { shouldValidate: true });
-        toast.success("Demo credentials loaded!");
+    const fillCredentials = (acc) => {
+        setSelectedRole(acc);
+        setValue("email", acc.email, { shouldValidate: true });
+        setValue("password", acc.password, { shouldValidate: true });
+        toast.success(`${acc.role} credentials loaded!`);
     };
 
     return (
@@ -99,7 +121,7 @@ const Login = () => {
 
             {/* Main Centered Container */}
             <div className="relative z-10 grid w-full max-w-sm sm:max-w-md lg:max-w-5xl overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl transition-all duration-300 lg:grid-cols-12">
-                {/* Left Column: Concept & Branding (Hidden on mobile/tablet, visible on desktop) */}
+                {/* Left Column: Concept & Branding */}
                 <div className="relative hidden lg:flex lg:col-span-7 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 p-8 lg:p-12 text-white">
                     {/* Subtle DNA background watermark */}
                     <div className="pointer-events-none absolute right-4 top-12 opacity-5">
@@ -171,7 +193,7 @@ const Login = () => {
                     </div>
                 </div>
 
-                {/* Right Column: Interactive Login Form (Takes full width on mobile/tablet, 5 cols on desktop) */}
+                {/* Right Column: Interactive Login Form */}
                 <div className="flex flex-col justify-center bg-white/95 dark:bg-slate-900/90 p-6 sm:p-8 lg:p-10 text-slate-900 dark:text-white transition-colors duration-300 lg:col-span-5">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Sign In to Command Center</h2>
@@ -180,7 +202,7 @@ const Login = () => {
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+                    <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
                         {/* Email Field */}
                         <div className="space-y-1.5">
                             <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -237,7 +259,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-primary-600 to-blue-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-600/25 transition-all duration-200 hover:from-primary-500 hover:to-blue-500 hover:shadow-primary-600/40 active:scale-[0.99] disabled:opacity-60"
+                            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-primary-600 to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-600/25 transition-all duration-200 hover:from-primary-500 hover:to-blue-500 hover:shadow-primary-600/40 active:scale-[0.99] disabled:opacity-60"
                         >
                             {loading ? (
                                 <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -250,8 +272,8 @@ const Login = () => {
                         </button>
                     </form>
 
-                    {/* Demo Credentials Quick Fill Card */}
-                    <div className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-4 backdrop-blur-sm">
+                    {/* Multi-Role Demo Credentials Selector */}
+                    <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-4 backdrop-blur-sm">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <ShieldCheck size={16} className="text-primary-600 dark:text-primary-400" />
@@ -259,20 +281,43 @@ const Login = () => {
                                     Demo Environment Access
                                 </span>
                             </div>
-                            <button
-                                type="button"
-                                onClick={fillDemoCredentials}
-                                className="rounded-lg bg-primary-600/10 dark:bg-primary-600/20 px-2.5 py-1 text-xs font-medium text-primary-700 dark:text-primary-300 transition hover:bg-primary-600/20 dark:hover:bg-primary-600/30 hover:text-primary-900 dark:hover:text-white"
-                            >
-                                Auto Fill
-                            </button>
+                            <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <UserCheck size={11} /> {selectedRole.role}
+                            </span>
                         </div>
+
+                        {/* Role Pills */}
+                        <div className="mt-3 flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+                            {DEMO_ACCOUNTS.map((acc) => (
+                                <button
+                                    key={acc.role}
+                                    type="button"
+                                    onClick={() => fillCredentials(acc)}
+                                    className={`flex-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-150 ${selectedRole.role === acc.role
+                                        ? "bg-primary-600 text-white shadow-sm"
+                                        : "bg-slate-200/60 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700"
+                                        }`}
+                                >
+                                    {acc.role}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Selected Role Display */}
                         <div className="mt-2.5 space-y-1 text-xs font-mono text-slate-600 dark:text-slate-400">
-                            <p>
-                                <span className="text-slate-500 dark:text-slate-500">Email:</span> admin@pharma.com
+                            <p className="truncate">
+                                <span className="text-slate-400 dark:text-slate-500 font-sans">Email:</span> {selectedRole.email}
                             </p>
                             <p>
-                                <span className="text-slate-500 dark:text-slate-500">Password:</span> Admin@123
+                                <span className="text-slate-400 dark:text-slate-500 font-sans">Password:</span> {selectedRole.password}
+                            </p>
+                        </div>
+
+                        {/* Implementation Note */}
+                        <div className="mt-3 flex items-start gap-2 border-t border-slate-200 dark:border-slate-800/80 pt-2.5 text-[11px] text-slate-500 dark:text-slate-400">
+                            <Info size={14} className="mt-0.5 shrink-0 text-primary-500" />
+                            <p className="leading-tight">
+                                <strong className="font-semibold text-slate-700 dark:text-slate-300">Note:</strong> I have Implemented RBAC before and also I have added search, Sort functionalities.
                             </p>
                         </div>
                     </div>
