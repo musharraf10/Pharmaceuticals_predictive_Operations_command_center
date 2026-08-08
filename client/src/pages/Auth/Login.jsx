@@ -322,7 +322,7 @@ const Login = () => {
                         <div className="mt-3 flex items-start gap-2 border-t border-slate-200 dark:border-slate-800/80 pt-2.5 text-[11px] text-slate-500 dark:text-slate-400">
                             <Info size={14} className="mt-0.5 shrink-0 text-primary-500" />
                             <p className="leading-tight">
-                                <strong className="font-semibold text-slate-700 dark:text-slate-300">Note:</strong> I have Implemented RBAC before and also I have added search, Sort functionalities.
+                                <strong className="font-semibold text-slate-700 dark:text-slate-300">Note:</strong> I have Implemented RBAC before but i only added admin sorry for that. And also I have added search, Sort functionalities.
                             </p>
                         </div>
                     </div>
